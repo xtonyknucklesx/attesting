@@ -1,0 +1,6 @@
+control_id,title,description
+CTL-001,Access Control Policy,The organization establishes and maintains an access control policy.
+CTL-002,User Account Management,User accounts are created approved and maintained following a formal process.
+CTL-003,Password Requirements,Passwords must be at least 12 characters and meet complexity requirements.
+CTL-004,Multi-Factor Authentication,MFA is required for all privileged access and remote access.
+CTL-005,Access Reviews,User access rights are reviewed quarterly and revoked when no longer needed.

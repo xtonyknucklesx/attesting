@@ -1,0 +1,73 @@
+{
+  "catalog": {
+    "uuid": "test-oscal-uuid-12345",
+    "metadata": {
+      "title": "Test OSCAL Catalog",
+      "version": "1.0"
+    },
+    "groups": [
+      {
+        "id": "ac",
+        "title": "Access Control",
+        "controls": [
+          {
+            "id": "3.1.1",
+            "title": "Limit system access to authorized users",
+            "parts": [
+              {
+                "name": "statement",
+                "prose": "Limit information system access to authorized users, processes acting on behalf of authorized users, and devices (including other information systems)."
+              },
+              {
+                "name": "guidance",
+                "prose": "Access control policies (e.g., identity- or role-based policies, control matrices, and cryptography) control access between active entities or subjects and passive entities or objects in information systems."
+              }
+            ],
+            "controls": [
+              {
+                "id": "3.1.1.a",
+                "title": "Authorized users are identified",
+                "parts": [
+                  {
+                    "name": "statement",
+                    "prose": "Authorized users of the information system are identified."
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "3.1.2",
+            "title": "Limit system access to the types of transactions",
+            "parts": [
+              {
+                "name": "statement",
+                "prose": "Limit information system access to the types of transactions and functions that authorized users are permitted to execute."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "au",
+        "title": "Audit and Accountability",
+        "controls": [
+          {
+            "id": "3.3.1",
+            "title": "Create and retain system audit logs",
+            "parts": [
+              {
+                "name": "statement",
+                "prose": "Create and retain system audit logs and records to the extent needed to enable the monitoring, analysis, investigation, and reporting of unlawful or unauthorized system activity."
+              },
+              {
+                "name": "guidance",
+                "prose": "An event is any observable occurrence in an organizational system. Audit records can be generated at various levels of abstraction."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

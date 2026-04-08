@@ -1,6 +1,28 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
+import { registerOrgInit } from './commands/org/init.js';
+import { registerScopeCommands } from './commands/org/scope.js';
+import { registerCatalogImport } from './commands/catalog/import.js';
+import { registerCatalogList } from './commands/catalog/list.js';
+import { registerCatalogInspect } from './commands/catalog/inspect.js';
+import { registerMappingCreate } from './commands/mapping/create.js';
+import { registerMappingImport } from './commands/mapping/import.js';
+import { registerMappingList } from './commands/mapping/list.js';
+import { registerMappingResolve } from './commands/mapping/resolve.js';
+import { registerImplAdd } from './commands/implementation/add.js';
+import { registerImplImport } from './commands/implementation/import.js';
+import { registerImplList } from './commands/implementation/list.js';
+import { registerImplStatus } from './commands/implementation/status.js';
+import { registerImplEdit } from './commands/implementation/edit.js';
+import { registerExportSig } from './commands/export/sig.js';
+import { registerExportOscal } from './commands/export/oscal.js';
+import { registerExportCsv } from './commands/export/csv.js';
+import { registerExportPdf } from './commands/export/pdf.js';
+import { registerExportSoa } from './commands/export/soa.js';
+import { registerAssessmentCreate } from './commands/assessment/create.js';
+import { registerAssessmentEvaluate } from './commands/assessment/evaluate.js';
+import { registerAssessmentPoam } from './commands/assessment/poam.js';
 
 const program = new Command();
 
@@ -9,7 +31,78 @@ program
   .description('OSCAL-native compliance control platform')
   .version('0.1.0');
 
-// Commands will be registered here as they're built
-// See docs/CROSSWALK_SPEC.md for the full command reference
+// ---------------------------------------------------------------
+// org commands
+// ---------------------------------------------------------------
+const orgCommand = program
+  .command('org')
+  .description('Manage organization profile');
+
+registerOrgInit(orgCommand);
+
+// ---------------------------------------------------------------
+// scope commands (top-level: crosswalk scope <sub>)
+// ---------------------------------------------------------------
+registerScopeCommands(program);
+
+// ---------------------------------------------------------------
+// catalog commands
+// ---------------------------------------------------------------
+const catalogCommand = program
+  .command('catalog')
+  .description('Manage control catalogs');
+
+registerCatalogImport(catalogCommand);
+registerCatalogList(catalogCommand);
+registerCatalogInspect(catalogCommand);
+
+// ---------------------------------------------------------------
+// mapping commands
+// ---------------------------------------------------------------
+const mappingCommand = program
+  .command('mapping')
+  .description('Manage cross-framework control mappings');
+
+registerMappingCreate(mappingCommand);
+registerMappingImport(mappingCommand);
+registerMappingList(mappingCommand);
+registerMappingResolve(mappingCommand);
+
+// ---------------------------------------------------------------
+// impl (implementation) commands
+// ---------------------------------------------------------------
+const implCommand = program
+  .command('impl')
+  .description('Manage implementation statements');
+
+registerImplAdd(implCommand);
+registerImplImport(implCommand);
+registerImplList(implCommand);
+registerImplStatus(implCommand);
+registerImplEdit(implCommand);
+
+// ---------------------------------------------------------------
+// export commands
+// ---------------------------------------------------------------
+const exportCommand = program
+  .command('export')
+  .description('Export compliance data in various formats');
+
+registerExportSig(exportCommand);
+registerExportOscal(exportCommand);
+registerExportCsv(exportCommand);
+registerExportPdf(exportCommand);
+registerExportSoa(exportCommand);
+
+// ---------------------------------------------------------------
+// assessment commands
+// ---------------------------------------------------------------
+const assessmentCommand = program
+  .command('assessment')
+  .description('Manage compliance assessments and POA&M items');
+
+registerAssessmentCreate(assessmentCommand);
+registerAssessmentEvaluate(assessmentCommand);
+registerAssessmentPoam(assessmentCommand);
 
 program.parse();
