@@ -108,6 +108,20 @@ function extractControlId(token: string): string {
 }
 
 /**
+ * Returns true if the token looks like a valid control ID
+ * (starts with an alphanumeric segment containing at least one digit
+ *  or is a known prefix letter like "A", "GV", "ID", etc.).
+ * Rejects orphaned title fragments like "other associated assets".
+ */
+function looksLikeControlId(raw: string): boolean {
+  const trimmed = raw.trim();
+  if (!trimmed) return false;
+  // Must start with something that contains a digit or is a short alpha prefix
+  // followed by a separator (dot, dash, underscore)
+  return /^[A-Za-z]{0,5}[\-._]?\d/.test(trimmed) || /^[A-Za-z]{1,3}[\-._]\d/.test(trimmed);
+}
+
+/**
  * Try to resolve a single reference string against the target index.
  * Returns the matched TargetControl or null.
  *
@@ -116,14 +130,15 @@ function extractControlId(token: string): string {
  *  b. After extracting control ID from descriptive text
  *  c. With/without leading zeros (handled by normalizeControlId)
  *  d. With NIST 800-171 prefix mapping (03.01.01 → sp_800_171_03.01.01)
- *  e. Strip trailing parenthetical
+ *  e. ISO hyphen→dot normalization (A-5.9 → A.5.9)
+ *  f. Strip trailing parenthetical
  */
 function resolveReference(
   ref: string,
   index: ReturnType<typeof buildTargetIndex>,
   catalogShortName: string
 ): TargetControl | null {
-  // First: extract the control ID portion (strip descriptive text)
+  // Extract the control ID portion (strip descriptive text)
   const controlIdRaw = extractControlId(ref);
   const norm = normalizeControlId(controlIdRaw);
 
@@ -134,13 +149,20 @@ function resolveReference(
   // Strategy d: NIST 800-171 prefix mapping
   // SIG says "03.15.03" but DB stores "sp_800_171_03.15.03"
   if (/nist-800-171/i.test(catalogShortName)) {
-    // Try with SP_800_171_ prefix
     const prefixed = normalizeControlId('SP_800_171_' + controlIdRaw);
     const prefixMatch = index.exact.get(prefixed);
     if (prefixMatch) return prefixMatch;
   }
 
-  // Strategy e: strip trailing parenthetical like "(a)" or "(1)"
+  // Strategy e: ISO hyphen→dot normalization
+  // SIG says "A-5.9" but DB stores "A.5.9"
+  const dotNorm = norm.replace(/-/g, '.');
+  if (dotNorm !== norm) {
+    const dotMatch = index.exact.get(dotNorm);
+    if (dotMatch) return dotMatch;
+  }
+
+  // Strategy f: strip trailing parenthetical like "(a)" or "(1)"
   const withoutParen = norm.replace(/\([^)]*\)$/, '');
   if (withoutParen !== norm) {
     const m = index.exact.get(withoutParen);
@@ -363,6 +385,10 @@ function runAutoLink(options: AutoLinkOptions): void {
         const tokens = splitReferences(rawRef);
 
         for (const token of tokens) {
+          // Skip tokens that don't look like control IDs (orphaned title fragments
+          // from line-wrapped SIG cells, e.g. "other associated assets")
+          if (!looksLikeControlId(token)) continue;
+
           const match = resolveReference(token, index, targetShortName);
           if (match) {
             totalResolved++;
