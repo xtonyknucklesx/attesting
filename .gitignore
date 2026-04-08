@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Database files — NEVER commit org-specific data
+*.db
+*.sqlite
+*.sqlite3
+
+# Local data — org-specific implementations, evidence, exports
+data/local/
+data/exports/
+
+# Any file with org-specific content
+*nutanix*
+*customer*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Excel temp files
+~$*.xlsx
+~$*.xlsm

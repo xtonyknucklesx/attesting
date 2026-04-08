@@ -1,0 +1,53 @@
+{
+  "name": "crosswalk",
+  "version": "0.1.0",
+  "description": "OSCAL-native compliance control platform. Map controls across frameworks, write implementations once, export to any format.",
+  "main": "dist/index.js",
+  "bin": {
+    "crosswalk": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": [
+    "oscal",
+    "compliance",
+    "nist",
+    "cmmc",
+    "sig",
+    "iso-27001",
+    "grc",
+    "security",
+    "risk-management",
+    "control-mapping",
+    "fedramp"
+  ],
+  "author": "Anthony Rossi III",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/arossi3/crosswalk"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0",
+    "commander": "^12.0.0",
+    "exceljs": "^4.4.0",
+    "pdfkit": "^0.15.0",
+    "uuid": "^10.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/node": "^20.0.0",
+    "@types/uuid": "^10.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0"
+  }
+}
