@@ -65,12 +65,13 @@ function runImplStatus(options: ImplStatusOptions): void {
 
   const COL_NAME = 30;
   const COL_NUM = 10;
-  const COL_PCT = 10;
+  const COL_PCT = 12;
 
   const header =
     pad('Catalog', COL_NAME) +
     rpad('Controls', COL_NUM) +
-    rpad('Implemented', COL_NUM) +
+    rpad('Impl', COL_NUM) +
+    rpad('Mapped', COL_NUM) +
     rpad('Partial', COL_NUM) +
     rpad('N/A', COL_NUM) +
     rpad('Not Impl.', COL_NUM) +
@@ -81,16 +82,27 @@ function runImplStatus(options: ImplStatusOptions): void {
   log('-'.repeat(header.length));
 
   for (const r of results) {
+    // Coverage column: "X%" for direct only, "X% (Y% eff.)" when mapped coverage exists
+    const coverageStr = r.mappedCoverage > 0
+      ? `${r.coveragePct}% (${r.effectivePct}%)`
+      : `${r.coveragePct}%`;
+
     log(
       pad(r.catalogName, COL_NAME) +
         rpad(String(r.totalControls), COL_NUM) +
         rpad(String(r.implemented), COL_NUM) +
+        rpad(String(r.mappedCoverage), COL_NUM) +
         rpad(String(r.partial), COL_NUM) +
         rpad(String(r.notApplicable), COL_NUM) +
         rpad(String(r.notImplemented), COL_NUM) +
-        rpad(`${r.coveragePct}%`, COL_PCT)
+        rpad(coverageStr, COL_PCT)
     );
   }
 
+  log('');
+  log('Coverage = (Impl + N/A) / Controls. Mapped = covered via control_mappings.');
+  if (results.some((r) => r.mappedCoverage > 0)) {
+    log('Effective % includes mapped controls: (Impl + N/A + Mapped) / Controls.');
+  }
   log('');
 }

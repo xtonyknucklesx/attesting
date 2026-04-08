@@ -10,6 +10,7 @@ import { registerMappingCreate } from './commands/mapping/create.js';
 import { registerMappingImport } from './commands/mapping/import.js';
 import { registerMappingList } from './commands/mapping/list.js';
 import { registerMappingResolve } from './commands/mapping/resolve.js';
+import { registerMappingAutoLink } from './commands/mapping/auto-link.js';
 import { registerImplAdd } from './commands/implementation/add.js';
 import { registerImplImport } from './commands/implementation/import.js';
 import { registerImplList } from './commands/implementation/list.js';
@@ -67,6 +68,7 @@ registerMappingCreate(mappingCommand);
 registerMappingImport(mappingCommand);
 registerMappingList(mappingCommand);
 registerMappingResolve(mappingCommand);
+registerMappingAutoLink(mappingCommand);
 
 // ---------------------------------------------------------------
 // impl (implementation) commands
