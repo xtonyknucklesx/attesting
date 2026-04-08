@@ -6,6 +6,10 @@ import { registerScopeCommands } from './commands/org/scope.js';
 import { registerCatalogImport } from './commands/catalog/import.js';
 import { registerCatalogList } from './commands/catalog/list.js';
 import { registerCatalogInspect } from './commands/catalog/inspect.js';
+import { registerCatalogDiff } from './commands/catalog/diff.js';
+import { registerCatalogUpdate } from './commands/catalog/update.js';
+import { registerCatalogWatch } from './commands/catalog/watch.js';
+import { registerCatalogImpact } from './commands/catalog/impact.js';
 import { registerMappingCreate } from './commands/mapping/create.js';
 import { registerMappingImport } from './commands/mapping/import.js';
 import { registerMappingList } from './commands/mapping/list.js';
@@ -56,6 +60,10 @@ const catalogCommand = program
 registerCatalogImport(catalogCommand);
 registerCatalogList(catalogCommand);
 registerCatalogInspect(catalogCommand);
+registerCatalogDiff(catalogCommand);
+registerCatalogUpdate(catalogCommand);
+registerCatalogWatch(catalogCommand);
+registerCatalogImpact(catalogCommand);
 
 // ---------------------------------------------------------------
 // mapping commands

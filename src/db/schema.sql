@@ -268,6 +268,22 @@ CREATE TABLE poam_items (
 );
 
 -- ============================================================
+-- CATALOG WATCH LIST (upstream source monitoring)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS catalog_watches (
+    id TEXT PRIMARY KEY,
+    catalog_short_name TEXT NOT NULL,
+    source_url TEXT NOT NULL,
+    source_format TEXT NOT NULL DEFAULT 'oscal',
+    -- 'oscal', 'csv', 'sig-xlsm'
+    last_hash TEXT,
+    last_checked_at TEXT,
+    last_changed_at TEXT,
+    auto_download INTEGER DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- ============================================================
 -- VIEWS FOR COMMON QUERIES
 -- ============================================================
 
