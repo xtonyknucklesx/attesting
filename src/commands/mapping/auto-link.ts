@@ -353,7 +353,7 @@ function runAutoLink(options: AutoLinkOptions): void {
   const insertMapping = database.prepare(
     `INSERT OR IGNORE INTO control_mappings
        (id, source_control_id, target_control_id, relationship, confidence, notes, source, created_at)
-     VALUES (?, ?, ?, 'related', 'high', ?, 'sig-content-library', ?)`
+     VALUES (?, ?, ?, 'equivalent', 'high', ?, 'sig-content-library', ?)`
   );
 
   let totalCreated = 0;

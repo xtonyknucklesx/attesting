@@ -18,6 +18,8 @@ export interface ResolvedMapping {
   path: string[];
   /** True if reached via 2+ hops. */
   isTransitive: boolean;
+  /** Human-readable intermediary for transitive mappings (e.g. "nist-800-53-r5:pm-14"). */
+  via: string | null;
 }
 
 /**
@@ -106,18 +108,26 @@ export function resolveControl(
   // Track visited UUIDs to prevent cycles
   const visited = new Set<string>([controlUuid]);
 
+  // Look up human-readable ref for a control UUID
+  const resolveRef = db.prepare(
+    `SELECT c.control_id, cat.short_name
+     FROM controls c JOIN catalogs cat ON c.catalog_id = cat.id WHERE c.id = ?`
+  );
+
   /**
    * Recursive BFS helper.
    * @param fromUuid   UUID to expand from.
    * @param depth      Current depth (1 = direct, 2 = transitive, …).
    * @param path       UUIDs traversed so far (empty at depth 1).
    * @param parentConf Confidence from the edge leading to fromUuid (used for degradation).
+   * @param viaRef     Human-readable ref of the intermediary (for depth 2+).
    */
   function expand(
     fromUuid: string,
     depth: number,
     path: string[],
-    parentConf: string
+    parentConf: string,
+    viaRef: string | null
   ): void {
     if (depth > maxDepth) return;
 
@@ -127,9 +137,6 @@ export function resolveControl(
       if (visited.has(mapping.otherControlId)) continue;
       visited.add(mapping.otherControlId);
 
-      // Compute effective confidence
-      // Depth 1 (direct): use the stored confidence as-is
-      // Depth 2+ (transitive): degrade once per hop beyond the first
       const effectiveConfidence =
         depth === 1
           ? mapping.confidence
@@ -146,21 +153,25 @@ export function resolveControl(
         confidence: effectiveConfidence,
         path: isTransitive ? currentPath : [],
         isTransitive,
+        via: isTransitive ? viaRef : null,
       });
 
-      // Continue BFS if we have depth budget remaining
+      // Continue BFS — build the via ref for the next level
       if (depth < maxDepth) {
+        const ref = resolveRef.get(mapping.otherControlId) as { control_id: string; short_name: string } | undefined;
+        const nextVia = ref ? `${ref.short_name}:${ref.control_id}` : null;
         expand(
           mapping.otherControlId,
           depth + 1,
           currentPath,
-          effectiveConfidence
+          effectiveConfidence,
+          nextVia
         );
       }
     }
   }
 
-  expand(controlUuid, 1, [], 'high');
+  expand(controlUuid, 1, [], 'high', null);
 
   return results;
 }

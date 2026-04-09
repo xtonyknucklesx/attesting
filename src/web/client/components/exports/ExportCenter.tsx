@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { runExport, getCatalogs } from '../../lib/api';
 import { useApi } from '../../hooks/useApi';
+import { useToastContext } from '../../App';
 import { FileSpreadsheet, FileJson, FileText, Download, Check, Loader2 } from 'lucide-react';
 
 interface ExportFormat {
@@ -23,15 +24,14 @@ interface ExportCenterProps {
 }
 
 export default function ExportCenter({ scope }: ExportCenterProps) {
+  const { add: toast } = useToastContext();
   const [exporting, setExporting] = useState<string | null>(null);
-  const [results, setResults] = useState<Record<string, { filename: string; outputPath: string }>>({});
-  const [error, setError] = useState('');
+  const [results, setResults] = useState<Record<string, { filename: string }>>({});
   const [selectedCatalog, setSelectedCatalog] = useState('');
   const { data: catalogs } = useApi(() => getCatalogs(), []);
 
   const handleExport = async (format: ExportFormat) => {
     setExporting(format.id);
-    setError('');
     try {
       const result = await runExport(
         format.id,
@@ -39,35 +39,28 @@ export default function ExportCenter({ scope }: ExportCenterProps) {
         scope || undefined
       );
       setResults((prev) => ({ ...prev, [format.id]: result }));
+      toast(`${format.name} exported successfully`, 'success');
     } catch (err: any) {
-      setError(err.message);
+      toast(err.message || 'Export failed', 'error');
     } finally {
       setExporting(null);
     }
   };
 
   return (
-    <div className="p-6 max-w-[1000px] mx-auto">
-      <h2 className="text-lg font-semibold text-gray-900 mb-2">Export Center</h2>
-      <p className="text-sm text-gray-500 mb-6">Generate compliance exports in any format. Files are saved to ~/.crosswalk/exports/</p>
+    <div className="p-6 lg:p-8 max-w-[1000px] mx-auto">
+      <h2 className="text-[18px] font-semibold text-gray-900 mb-1 tracking-tight">Export Center</h2>
+      <p className="text-[13px] text-gray-500 mb-6">Generate compliance exports in any format</p>
 
-      {error && <p className="text-sm text-red-500 mb-4" role="alert">{error}</p>}
-
-      {/* Catalog selector for formats that need it */}
+      {/* Catalog selector */}
       <div className="mb-6">
-        <label htmlFor="export-catalog" className="block text-xs font-medium text-gray-600 mb-1">
+        <label htmlFor="export-catalog" className="block text-[12px] font-medium text-gray-600 mb-1.5">
           Target Catalog (for SIG export)
         </label>
-        <select
-          id="export-catalog"
-          value={selectedCatalog}
-          onChange={(e) => setSelectedCatalog(e.target.value)}
-          className="w-full max-w-xs text-sm border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        >
+        <select id="export-catalog" value={selectedCatalog} onChange={(e) => setSelectedCatalog(e.target.value)}
+          className="w-full max-w-xs text-[13px] border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-colors">
           <option value="">Auto-detect</option>
-          {catalogs?.map((c: any) => (
-            <option key={c.short_name} value={c.short_name}>{c.name}</option>
-          ))}
+          {catalogs?.map((c: any) => <option key={c.short_name} value={c.short_name}>{c.name}</option>)}
         </select>
       </div>
 
@@ -78,36 +71,30 @@ export default function ExportCenter({ scope }: ExportCenterProps) {
           const isExporting = exporting === format.id;
           const result = results[format.id];
           return (
-            <div key={format.id} className="bg-white border border-gray-200 rounded-lg p-5 hover:shadow-sm transition-shadow">
-              <div className="flex items-start gap-3 mb-3">
-                <div className="p-2 bg-indigo-50 rounded-lg" aria-hidden="true">
+            <div key={format.id} className="bg-white border border-gray-200 rounded-xl p-5 card-hover">
+              <div className="flex items-start gap-3 mb-4">
+                <div className="p-2.5 bg-indigo-50 rounded-lg" aria-hidden="true">
                   <Icon className="h-5 w-5 text-indigo-600" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900">{format.name}</h3>
-                  <p className="text-xs text-gray-500 mt-0.5">{format.description}</p>
+                  <h3 className="text-[13px] font-semibold text-gray-900">{format.name}</h3>
+                  <p className="text-[12px] text-gray-500 mt-0.5">{format.description}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => handleExport(format)}
-                  disabled={isExporting}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-xs font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
-                  aria-live="polite"
-                >
+                <button onClick={() => handleExport(format)} disabled={!!exporting}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-indigo-600 text-white text-[12px] font-medium rounded-lg hover:bg-indigo-700 active:bg-indigo-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-colors duration-150"
+                  aria-live="polite">
                   {isExporting ? (
-                    <><Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" /> Exporting...</>
+                    <><Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> Exporting...</>
                   ) : (
-                    <><Download className="h-3 w-3" aria-hidden="true" /> Export</>
+                    <><Download className="h-3.5 w-3.5" aria-hidden="true" /> Export</>
                   )}
                 </button>
                 {result && (
-                  <a
-                    href={`/api/export/download/${encodeURIComponent(result.filename)}`}
-                    className="inline-flex items-center gap-1 text-xs text-green-600 hover:text-green-700"
-                    download
-                  >
-                    <Check className="h-3 w-3" aria-hidden="true" />
+                  <a href={`/api/export/download/${encodeURIComponent(result.filename)}`}
+                    className="inline-flex items-center gap-1 text-[12px] text-green-600 hover:text-green-700 font-medium" download>
+                    <Check className="h-3.5 w-3.5" aria-hidden="true" />
                     {result.filename}
                   </a>
                 )}

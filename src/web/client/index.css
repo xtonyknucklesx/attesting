@@ -1,21 +1,176 @@
 @import "tailwindcss";
 
-:root {
-  --color-accent: #4F46E5;
-  --color-implemented: #22c55e;
-  --color-partial: #f59e0b;
-  --color-not-implemented: #ef4444;
-  --color-na: #9ca3af;
-  --color-planned: #3b82f6;
+/* ── Custom theme layer ─────────────────────────────────────── */
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
 }
 
+:root {
+  --accent: #4F46E5;
+  --accent-light: #eef2ff;
+  --impl-green: #22c55e;
+  --impl-amber: #f59e0b;
+  --impl-rose: #f43f5e;
+  --impl-gray: #9ca3af;
+  --impl-blue: #3b82f6;
+}
+
+.dark {
+  --accent-light: #1e1b4b;
+}
+
+/* ── Base ───────────────────────────────────────────────────── */
+
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* Dark mode auto-detect */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) { color-scheme: dark; }
+  :root:not(.light) body {
+    background-color: #0a0a0f;
+    color: #e5e7eb;
+  }
+  :root:not(.light) .bg-white { background-color: #111827 !important; }
+  :root:not(.light) .bg-gray-50 { background-color: #0f172a !important; }
+  :root:not(.light) .bg-gray-100 { background-color: #1e293b !important; }
+  :root:not(.light) .border-gray-200 { border-color: #374151 !important; }
+  :root:not(.light) .border-gray-100 { border-color: #1f2937 !important; }
+  :root:not(.light) .text-gray-900 { color: #f3f4f6 !important; }
+  :root:not(.light) .text-gray-700 { color: #d1d5db !important; }
+  :root:not(.light) .text-gray-600 { color: #9ca3af !important; }
+  :root:not(.light) .text-gray-500 { color: #6b7280 !important; }
+  :root:not(.light) .text-gray-400 { color: #4b5563 !important; }
+  :root:not(.light) .hover\:bg-gray-50:hover { background-color: #1e293b !important; }
+  :root:not(.light) .bg-indigo-50 { background-color: #1e1b4b !important; }
+  :root:not(.light) .text-indigo-700 { color: #a5b4fc !important; }
+  :root:not(.light) .text-indigo-600 { color: #818cf8 !important; }
+  :root:not(.light) svg text { fill: #e5e7eb; }
+  :root:not(.light) .bg-green-100 { background-color: #052e16 !important; }
+  :root:not(.light) .bg-amber-100 { background-color: #451a03 !important; }
+  :root:not(.light) .bg-red-100, :root:not(.light) .bg-rose-100 { background-color: #4c0519 !important; }
+}
+
+/* ── Animations ─────────────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ringGrow {
+  from { stroke-dashoffset: var(--ring-circumference); }
+  to   { stroke-dashoffset: var(--ring-target); }
+}
+
+@keyframes subtlePulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 150ms ease-out both;
+}
+
+.animate-slide-right {
+  animation: slideInRight 200ms ease-out both;
+}
+
+.animate-slide-down {
+  animation: slideInDown 200ms ease-out both;
+}
+
+.animate-ring {
+  animation: ringGrow 600ms ease-out both;
+}
+
+.pulse-gentle {
+  animation: subtlePulse 3s ease-in-out infinite;
+}
+
+/* Node stagger — set via inline style --delay */
+.stagger-node {
+  animation: fadeIn 200ms ease-out both;
+  animation-delay: var(--delay, 0ms);
 }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ── Card hover ─────────────────────────────────────────────── */
+
+.card-hover {
+  transition: box-shadow 150ms ease, transform 150ms ease;
+}
+.card-hover:hover {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  transform: scale(1.01);
+}
+
+/* ── Toast ──────────────────────────────────────────────────── */
+
+.toast-container {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  animation: slideInDown 200ms ease-out both;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 240px;
+}
+.toast-success { border-left: 3px solid #22c55e; }
+.toast-error   { border-left: 3px solid #f43f5e; }
+
+/* ── Scrollbar ──────────────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* ── Search highlight ───────────────────────────────────────── */
+
+mark.search-highlight {
+  background: #fef08a;
+  color: inherit;
+  border-radius: 2px;
+  padding: 0 1px;
 }

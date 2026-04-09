@@ -1,19 +1,28 @@
 import React from 'react';
-import { Clock } from 'lucide-react';
+import { Clock, Circle } from 'lucide-react';
 import { useApi } from '../../hooks/useApi';
 import { getRecentImplementations } from '../../lib/api';
 
-const STATUS_LABELS: Record<string, { text: string; className: string }> = {
-  'implemented': { text: 'Implemented', className: 'bg-green-100 text-green-700' },
-  'partially-implemented': { text: 'Partial', className: 'bg-amber-100 text-amber-700' },
-  'planned': { text: 'Planned', className: 'bg-blue-100 text-blue-700' },
-  'not-applicable': { text: 'N/A', className: 'bg-gray-100 text-gray-600' },
-  'not-implemented': { text: 'Not Impl.', className: 'bg-red-100 text-red-700' },
+const STATUS_DOT: Record<string, string> = {
+  'implemented': 'text-green-500',
+  'partially-implemented': 'text-amber-500',
+  'planned': 'text-blue-500',
+  'not-applicable': 'text-gray-400',
+  'not-implemented': 'text-rose-400',
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  'implemented': 'Implemented',
+  'partially-implemented': 'Partial',
+  'planned': 'Planned',
+  'not-applicable': 'N/A',
+  'not-implemented': 'Not Impl.',
 };
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'just now';
   if (mins < 60) return `${mins}m ago`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}h ago`;
@@ -24,30 +33,33 @@ export default function RecentActivity() {
   const { data, loading } = useApi(() => getRecentImplementations(), []);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg p-5">
+    <div className="bg-white border border-gray-200 rounded-xl p-5">
       <div className="flex items-center gap-2 mb-4">
         <Clock className="h-4 w-4 text-gray-400" aria-hidden="true" />
-        <h2 className="text-sm font-semibold text-gray-900">Recent Activity</h2>
+        <h3 className="text-[13px] font-semibold text-gray-900">Recent Activity</h3>
       </div>
       {loading ? (
-        <p className="text-xs text-gray-400">Loading...</p>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => <div key={i} className="h-5 bg-gray-50 rounded animate-pulse" />)}
+        </div>
       ) : !data || data.length === 0 ? (
-        <p className="text-xs text-gray-400">No recent activity</p>
+        <div className="text-center py-6">
+          <Clock className="h-6 w-6 mx-auto mb-2 text-gray-200" aria-hidden="true" />
+          <p className="text-[12px] text-gray-400">No recent activity</p>
+        </div>
       ) : (
-        <ul className="space-y-2" role="list" aria-label="Recent implementation changes">
+        <ul className="space-y-1" role="list" aria-label="Recent changes">
           {data.map((item: any) => {
-            const statusInfo = STATUS_LABELS[item.status] ?? STATUS_LABELS['not-implemented'];
+            const dot = STATUS_DOT[item.status] ?? STATUS_DOT['not-implemented'];
             return (
-              <li key={item.id} className="flex items-center justify-between text-xs">
+              <li key={item.id} className="flex items-center justify-between py-1.5 px-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors">
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium shrink-0 ${statusInfo.className}`}>
-                    {statusInfo.text}
-                  </span>
-                  <span className="text-gray-700 truncate">
+                  <Circle className={`h-2 w-2 fill-current shrink-0 ${dot}`} aria-label={STATUS_LABEL[item.status] ?? 'Unknown'} />
+                  <span className="text-[12px] font-mono text-gray-700 truncate">
                     {item.catalog_short_name}:{item.control_id}
                   </span>
                 </div>
-                <time className="text-gray-400 shrink-0 ml-2" dateTime={item.updated_at}>
+                <time className="text-[11px] text-gray-400 shrink-0 ml-3" dateTime={item.updated_at}>
                   {timeAgo(item.updated_at)}
                 </time>
               </li>
