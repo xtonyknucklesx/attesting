@@ -6,11 +6,11 @@ import MappingGraph from './MappingGraph';
 import ResolveView from './ResolveView';
 import ControlDetail from './ControlDetail';
 
-const STATUS_DOT: Record<string, string> = {
-  'implemented': 'bg-green-500',
-  'partially-implemented': 'bg-amber-500',
-  'planned': 'bg-blue-500',
-  'not-applicable': 'bg-gray-400',
+const STATUS_DOT_CLASS: Record<string, string> = {
+  'implemented': 'status-dot-green',
+  'partially-implemented': 'status-dot-amber',
+  'planned': 'status-dot-blue',
+  'not-applicable': 'status-dot-gray',
 };
 
 export default function MappingExplorer() {
@@ -70,50 +70,35 @@ export default function MappingExplorer() {
   }, [doResolve]);
 
   return (
-    <div className="flex h-[calc(100vh-57px)]">
+    <div className="flex h-[calc(100vh-49px)]">
       {/* Main area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Search bar */}
-        <div className="flex items-center gap-3 p-4 border-b border-gray-200 bg-white">
+        <div className="flex items-center gap-3 p-4 glass-header">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-2.5 top-2 h-4 w-4 text-gray-400" aria-hidden="true" />
+            <Search className="absolute left-3 top-2 h-4 w-4" style={{ color: 'var(--text-dim)' }} aria-hidden="true" />
             <label htmlFor="mapping-search" className="sr-only">Search control (catalog:control_id)</label>
-            <input
-              id="mapping-search"
-              type="text"
-              value={search}
+            <input id="mapping-search" type="text" value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               placeholder="sig-lite-2026:A.1"
-              className="w-full pl-8 pr-3 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
+              className="input-glass w-full pl-9" />
           </div>
-          <button
-            onClick={handleSearch}
-            disabled={loading}
-            className="px-4 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50"
-          >
+          <button onClick={handleSearch} disabled={loading}
+            className="px-4 py-1.5 bg-indigo-600 text-white text-[13px] font-medium rounded-xl hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition-colors shadow-lg shadow-indigo-600/20">
             {loading ? 'Resolving...' : 'Resolve'}
           </button>
           {resolveData && (
-            <div className="flex items-center border border-gray-200 rounded-md overflow-hidden">
-              <button
-                onClick={() => setShowTextView(false)}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors ${!showTextView ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-                aria-pressed={!showTextView}
-              >
-                Graph
-              </button>
-              <button
-                onClick={() => setShowTextView(true)}
-                className={`px-3 py-1.5 text-xs font-medium transition-colors ${showTextView ? 'bg-indigo-600 text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
-                aria-pressed={showTextView}
-              >
-                Text
-              </button>
+            <div className="flex items-center rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-glass)' }}>
+              <button onClick={() => setShowTextView(false)}
+                className={`px-3 py-1.5 text-[12px] font-medium transition-colors ${!showTextView ? 'glass-btn-active' : 'glass-btn'}`}
+                aria-pressed={!showTextView}>Graph</button>
+              <button onClick={() => setShowTextView(true)}
+                className={`px-3 py-1.5 text-[12px] font-medium transition-colors ${showTextView ? 'glass-btn-active' : 'glass-btn'}`}
+                aria-pressed={showTextView}>Text</button>
             </div>
           )}
-          {error && <span className="text-sm text-red-500" role="alert">{error}</span>}
+          {error && <span className="text-[13px] text-rose-400" role="alert">{error}</span>}
         </div>
 
         {/* Content */}
@@ -168,36 +153,36 @@ function SummaryView({ summary, onResolve }: { summary: any; onResolve: (cat: st
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-6 lg:p-8 max-w-4xl mx-auto">
       {/* Stats row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-2xl font-bold text-indigo-600">{summary.total}</p>
-          <p className="text-xs text-gray-500">Total mappings</p>
+        <div className="glass-static rounded-2xl p-4">
+          <p className="text-2xl font-bold text-indigo-400">{summary.total}</p>
+          <p className="text-[11px]" style={{ color: 'var(--text-dim)' }}>Total mappings</p>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-2xl font-bold text-gray-900">{summary.sourceControls.length}</p>
-          <p className="text-xs text-gray-500">Source controls</p>
+        <div className="glass-static rounded-2xl p-4">
+          <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{summary.sourceControls.length}</p>
+          <p className="text-[11px]" style={{ color: 'var(--text-dim)' }}>Source controls</p>
         </div>
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <p className="text-2xl font-bold text-gray-900">{summary.byTarget.length}</p>
-          <p className="text-xs text-gray-500">Target frameworks</p>
+        <div className="glass-static rounded-2xl p-4">
+          <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>{summary.byTarget.length}</p>
+          <p className="text-[11px]" style={{ color: 'var(--text-dim)' }}>Target frameworks</p>
         </div>
       </div>
 
       {/* Target breakdown */}
-      <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6">
-        <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider mb-3">Mappings by Target Framework</h3>
+      <div className="glass-static rounded-2xl p-5 mb-6">
+        <h3 className="text-[11px] font-semibold uppercase tracking-wider mb-3" style={{ color: 'var(--text-dim)' }}>Mappings by Target Framework</h3>
         <div className="space-y-2">
           {summary.byTarget.map((t: any) => {
             const pct = summary.total > 0 ? Math.round((t.count / summary.total) * 100) : 0;
             return (
               <div key={t.short_name} className="flex items-center gap-3">
-                <span className="text-xs text-gray-600 w-40 truncate">{t.short_name}</span>
-                <div className="flex-1 bg-gray-100 rounded-full h-2" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={`${t.name}: ${t.count} mappings`}>
-                  <div className="bg-indigo-500 rounded-full h-2 transition-all" style={{ width: `${pct}%` }} />
+                <span className="text-[12px] w-40 truncate" style={{ color: 'var(--text-secondary)' }}>{t.short_name}</span>
+                <div className="flex-1 rounded-full h-1.5" style={{ background: 'var(--ring-track)' }} role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label={`${t.name}: ${t.count} mappings`}>
+                  <div className="bg-indigo-500 rounded-full h-1.5 transition-all" style={{ width: `${pct}%` }} />
                 </div>
-                <span className="text-xs font-medium text-gray-900 w-10 text-right">{t.count}</span>
+                <span className="text-[12px] font-medium w-10 text-right" style={{ color: 'var(--text-primary)' }}>{t.count}</span>
               </div>
             );
           })}
@@ -205,47 +190,33 @@ function SummaryView({ summary, onResolve }: { summary: any; onResolve: (cat: st
       </div>
 
       {/* Source controls table */}
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-200">
-          <h3 className="text-xs font-semibold text-gray-900 uppercase tracking-wider">Source Controls — Click to Explore</h3>
+      <div className="glass-static rounded-2xl overflow-hidden">
+        <div className="px-5 py-3" style={{ borderBottom: '1px solid var(--border-glass)' }}>
+          <h3 className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: 'var(--text-dim)' }}>Source Controls — Click to Explore</h3>
         </div>
         <div className="max-h-[400px] overflow-y-auto">
-          <table className="w-full" role="table">
+          <table className="w-full glass-table" role="table">
             <caption className="sr-only">Source controls with mapping counts</caption>
-            <thead className="bg-gray-50 sticky top-0">
-              <tr className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                <th scope="col" className="px-4 py-2 w-8"></th>
-                <th scope="col" className="px-4 py-2 w-36">Control</th>
-                <th scope="col" className="px-4 py-2">Title</th>
-                <th scope="col" className="px-4 py-2 w-24 text-right">Mappings</th>
-                <th scope="col" className="px-4 py-2 w-8"></th>
+            <thead className="sticky top-0">
+              <tr>
+                <th scope="col" className="w-8"></th>
+                <th scope="col" className="w-40">Control</th>
+                <th scope="col">Title</th>
+                <th scope="col" className="w-24 text-right">Mappings</th>
+                <th scope="col" className="w-8"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody>
               {summary.sourceControls.map((sc: any) => {
-                const dot = STATUS_DOT[sc.impl_status] ?? 'bg-red-500';
+                const dotCls = STATUS_DOT_CLASS[sc.impl_status] ?? 'status-dot-rose';
                 return (
-                  <tr
-                    key={`${sc.catalog_short_name}:${sc.control_id}`}
-                    className="hover:bg-indigo-50 cursor-pointer transition-colors"
-                    onClick={() => onResolve(sc.catalog_short_name, sc.control_id)}
-                    role="row"
-                  >
-                    <td className="px-4 py-2">
-                      <span
-                        className={`inline-block h-2 w-2 rounded-full ${dot}`}
-                        role="img"
-                        aria-label={sc.impl_status ?? 'not implemented'}
-                      />
-                    </td>
-                    <td className="px-4 py-2 font-mono text-sm font-medium text-indigo-700">
-                      {sc.catalog_short_name}:{sc.control_id}
-                    </td>
-                    <td className="px-4 py-2 text-sm text-gray-600 truncate max-w-sm">{sc.title}</td>
-                    <td className="px-4 py-2 text-sm font-medium text-gray-900 text-right">{sc.mapping_count}</td>
-                    <td className="px-4 py-2">
-                      <ArrowRight className="h-3.5 w-3.5 text-gray-300" aria-hidden="true" />
-                    </td>
+                  <tr key={`${sc.catalog_short_name}:${sc.control_id}`}
+                    className="cursor-pointer" onClick={() => onResolve(sc.catalog_short_name, sc.control_id)}>
+                    <td><span className={`status-dot ${dotCls}`} role="img" aria-label={sc.impl_status ?? 'not implemented'} /></td>
+                    <td className="font-mono font-medium text-indigo-400">{sc.catalog_short_name}:{sc.control_id}</td>
+                    <td className="truncate max-w-sm">{sc.title}</td>
+                    <td className="font-medium text-right" style={{ color: 'var(--text-primary)' }}>{sc.mapping_count}</td>
+                    <td><ArrowRight className="h-3.5 w-3.5" style={{ color: 'var(--text-dim)' }} aria-hidden="true" /></td>
                   </tr>
                 );
               })}

@@ -84,6 +84,25 @@ CREATE VIRTUAL TABLE controls_fts USING fts5(
 );
 
 -- ============================================================
+-- CONTROL PARAMETERS (organization-defined values)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS control_params (
+    id TEXT PRIMARY KEY,
+    control_id TEXT NOT NULL REFERENCES controls(id) ON DELETE CASCADE,
+    param_id TEXT NOT NULL,                 -- OSCAL param ID: "ac-02_odp.01"
+    label TEXT,                             -- Display label: "organization-defined frequency"
+    description TEXT,                       -- Guideline prose from OSCAL
+    default_value TEXT,                     -- Default/example from OSCAL select choices
+    value TEXT,                             -- User-set value: "quarterly"
+    set_by TEXT,                            -- Who set it
+    set_at TEXT,                            -- When it was set
+    UNIQUE(control_id, param_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_params_control ON control_params(control_id);
+
+-- ============================================================
 -- LAYER 2: CROSS-FRAMEWORK MAPPINGS
 -- ============================================================
 
@@ -265,6 +284,130 @@ CREATE TABLE poam_items (
     notes TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- ============================================================
+-- GOVERNANCE: Policies, Committees, Roles
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS policies (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    policy_type TEXT DEFAULT 'policy',
+    status TEXT DEFAULT 'draft',
+    version TEXT,
+    owner TEXT,
+    approver TEXT,
+    approved_date TEXT,
+    effective_date TEXT,
+    review_date TEXT,
+    expiry_date TEXT,
+    review_frequency_days INTEGER DEFAULT 365,
+    document_path TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS policy_controls (
+    id TEXT PRIMARY KEY,
+    policy_id TEXT NOT NULL REFERENCES policies(id) ON DELETE CASCADE,
+    control_id TEXT NOT NULL REFERENCES controls(id) ON DELETE CASCADE,
+    notes TEXT,
+    UNIQUE(policy_id, control_id)
+);
+
+CREATE TABLE IF NOT EXISTS committees (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    meeting_frequency TEXT,
+    chair TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS committee_meetings (
+    id TEXT PRIMARY KEY,
+    committee_id TEXT NOT NULL REFERENCES committees(id) ON DELETE CASCADE,
+    meeting_date TEXT NOT NULL,
+    attendees TEXT,
+    agenda TEXT,
+    minutes TEXT,
+    action_items TEXT,
+    status TEXT DEFAULT 'scheduled',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS roles_register (
+    id TEXT PRIMARY KEY,
+    role_title TEXT NOT NULL,
+    description TEXT,
+    current_holder TEXT,
+    appointed_date TEXT,
+    appointment_authority TEXT,
+    backup_holder TEXT,
+    regulatory_requirement TEXT,
+    replacement_timeline TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+-- ============================================================
+-- RISK MANAGEMENT: Register, Matrix, Exceptions
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS risk_matrix (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL DEFAULT 'Default',
+    likelihood_levels TEXT NOT NULL DEFAULT '["Rare","Unlikely","Possible","Likely","Almost Certain"]',
+    impact_levels TEXT NOT NULL DEFAULT '["Negligible","Minor","Moderate","Major","Critical"]',
+    risk_appetite TEXT DEFAULT 'moderate',
+    appetite_threshold INTEGER DEFAULT 9,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS risks (
+    id TEXT PRIMARY KEY,
+    risk_id TEXT NOT NULL,
+    title TEXT NOT NULL,
+    description TEXT,
+    category TEXT,
+    source TEXT,
+    likelihood INTEGER NOT NULL,
+    impact INTEGER NOT NULL,
+    inherent_risk_score INTEGER,
+    residual_likelihood INTEGER,
+    residual_impact INTEGER,
+    residual_risk_score INTEGER,
+    treatment TEXT DEFAULT 'mitigate',
+    treatment_plan TEXT,
+    owner TEXT NOT NULL,
+    status TEXT DEFAULT 'open',
+    review_date TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS risk_controls (
+    id TEXT PRIMARY KEY,
+    risk_id TEXT NOT NULL REFERENCES risks(id) ON DELETE CASCADE,
+    control_id TEXT NOT NULL REFERENCES controls(id) ON DELETE CASCADE,
+    effectiveness TEXT DEFAULT 'partial',
+    notes TEXT,
+    UNIQUE(risk_id, control_id)
+);
+
+CREATE TABLE IF NOT EXISTS risk_exceptions (
+    id TEXT PRIMARY KEY,
+    risk_id TEXT NOT NULL REFERENCES risks(id),
+    control_id TEXT REFERENCES controls(id),
+    justification TEXT NOT NULL,
+    compensating_controls TEXT,
+    approved_by TEXT NOT NULL,
+    approved_date TEXT NOT NULL,
+    expiry_date TEXT NOT NULL,
+    status TEXT DEFAULT 'active',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 -- ============================================================

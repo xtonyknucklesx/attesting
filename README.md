@@ -1,3 +1,5 @@
+![CI](https://github.com/xtonyknucklesx/crosswalk/actions/workflows/ci.yml/badge.svg)
+
 # Crosswalk
 
 OSCAL-native compliance control platform. Write your control implementations once, map them across every framework, and export to any format.

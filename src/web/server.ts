@@ -12,6 +12,8 @@ import { diffRoutes } from './routes/diff.js';
 import { exportRoutes } from './routes/export.js';
 import { orgRoutes } from './routes/org.js';
 import { watchRoutes } from './routes/watches.js';
+import { governanceRoutes } from './routes/governance.js';
+import { riskRoutes } from './routes/risk.js';
 
 export interface ServerOptions {
   port: number;
@@ -55,6 +57,8 @@ export function createApp() {
   app.use('/api/diff', diffRoutes());
   app.use('/api/export', exportRoutes());
   app.use('/api/watches', watchRoutes());
+  app.use('/api/governance', governanceRoutes());
+  app.use('/api/risk', riskRoutes());
 
   return app;
 }

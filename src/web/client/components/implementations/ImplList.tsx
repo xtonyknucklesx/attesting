@@ -2,24 +2,20 @@ import React from 'react';
 import { useApi } from '../../hooks/useApi';
 import { getImplementations, getControls } from '../../lib/api';
 
-const STATUS_DOT: Record<string, string> = {
-  'implemented': 'bg-green-500',
-  'partially-implemented': 'bg-amber-500',
-  'planned': 'bg-blue-500',
-  'not-applicable': 'bg-gray-400',
-  'not-implemented': 'bg-red-500',
+const STATUS_DOT_CLASS: Record<string, string> = {
+  'implemented': 'status-dot-green',
+  'partially-implemented': 'status-dot-amber',
+  'planned': 'status-dot-blue',
+  'not-applicable': 'status-dot-gray',
+  'not-implemented': 'status-dot-rose',
 };
 
 interface ImplListProps {
-  catalog: string;
-  statusFilter: string;
-  scope: string;
-  selectedControlId: string | null;
-  onSelect: (control: any) => void;
+  catalog: string; statusFilter: string; scope: string;
+  selectedControlId: string | null; onSelect: (control: any) => void;
 }
 
 export default function ImplList({ catalog, statusFilter, scope, selectedControlId, onSelect }: ImplListProps) {
-  // If catalog is selected, show controls from that catalog with impl status
   const params: Record<string, string> = { limit: '200' };
   if (statusFilter) params.status = statusFilter;
   if (scope) params.scope = scope;
@@ -32,43 +28,33 @@ export default function ImplList({ catalog, statusFilter, scope, selectedControl
     [catalog, statusFilter, scope]
   );
 
-  if (loading) return <div className="p-4 text-xs text-gray-400">Loading...</div>;
-
-  const items = catalog
-    ? (data as any)?.controls ?? []
-    : (data as any)?.implementations ?? [];
-
-  if (items.length === 0) {
-    return <div className="p-4 text-xs text-gray-400">No controls found</div>;
-  }
+  if (loading) return <div className="p-4 text-[12px]" style={{ color: 'var(--text-dim)' }}>Loading...</div>;
+  const items = catalog ? (data as any)?.controls ?? [] : (data as any)?.implementations ?? [];
+  if (items.length === 0) return <div className="p-4 text-[12px]" style={{ color: 'var(--text-dim)' }}>No controls found</div>;
 
   return (
     <div className="flex-1 overflow-y-auto" role="listbox" aria-label="Controls">
       {items.map((item: any) => {
-        const controlId = item.control_id;
         const status = item.impl_status ?? item.status ?? 'not-implemented';
         const isSelected = item.id === selectedControlId;
-        const dot = STATUS_DOT[status] ?? STATUS_DOT['not-implemented'];
-
+        const dotCls = STATUS_DOT_CLASS[status] ?? 'status-dot-rose';
         return (
-          <button
-            key={item.id}
-            role="option"
-            aria-selected={isSelected}
-            onClick={() => onSelect({
-              ...item,
-              catalogShortName: item.catalog_short_name ?? catalog,
-            })}
-            className={`w-full text-left px-4 py-2.5 border-b border-gray-100 transition-colors ${
-              isSelected ? 'bg-indigo-50 border-l-2 border-l-indigo-600' : 'hover:bg-gray-50'
-            }`}
+          <button key={item.id} role="option" aria-selected={isSelected}
+            onClick={() => onSelect({ ...item, catalogShortName: item.catalog_short_name ?? catalog })}
+            className="w-full text-left px-4 py-2.5 transition-colors duration-75"
+            style={{
+              borderBottom: '1px solid var(--border-subtle)',
+              background: isSelected ? 'var(--bg-glass-active)' : 'transparent',
+              borderLeft: isSelected ? '2px solid #818cf8' : '2px solid transparent',
+            }}
+            onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--row-hover)'; }}
+            onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
           >
-            <div className="flex items-center gap-2">
-              <span className={`h-2 w-2 rounded-full shrink-0 ${dot}`}
-                role="img" aria-label={status} />
-              <span className="text-sm font-mono font-medium text-gray-900">{controlId}</span>
+            <div className="flex items-center gap-2.5">
+              <span className={`status-dot ${dotCls}`} role="img" aria-label={status} />
+              <span className="text-[13px] font-mono font-medium" style={{ color: 'var(--text-primary)' }}>{item.control_id}</span>
             </div>
-            <p className="text-xs text-gray-500 mt-0.5 truncate ml-4">
+            <p className="text-[11px] mt-0.5 truncate ml-[18px]" style={{ color: 'var(--text-dim)' }}>
               {item.title ?? item.control_title}
             </p>
           </button>

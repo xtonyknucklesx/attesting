@@ -190,27 +190,54 @@ export function exportOscalSsp(
   // Build the this-system component UUID so we can reference it
   const thisSystemUuid = generateUuid();
 
-  // Build implemented-requirements with implementation-status prop and by-components
-  const controlImpls = implementations.map((impl) => ({
-    uuid: generateUuid(),
-    'control-id': impl.control_native_id,
-    props: [
-      {
-        name: 'implementation-status',
-        value: statusMap[impl.status] ?? 'planned',
-      },
-      ...(impl.responsible_role
-        ? [{ name: 'responsible-role', value: impl.responsible_role }]
-        : []),
-    ],
-    'by-components': [
-      {
-        'component-uuid': thisSystemUuid,
-        uuid: generateUuid(),
-        description: impl.statement,
-      },
-    ],
-  }));
+  // Load set parameter values for controls that have implementations
+  // Ensure table exists (backward compat)
+  db.exec(`CREATE TABLE IF NOT EXISTS control_params (
+    id TEXT PRIMARY KEY, control_id TEXT NOT NULL, param_id TEXT NOT NULL,
+    label TEXT, description TEXT, default_value TEXT, value TEXT, set_by TEXT, set_at TEXT,
+    UNIQUE(control_id, param_id)
+  )`);
+
+  const loadParams = db.prepare(
+    `SELECT cp.param_id, cp.value
+     FROM control_params cp
+     JOIN controls c ON cp.control_id = c.id
+     WHERE c.control_id = ? AND c.catalog_id IN (SELECT id FROM catalogs WHERE short_name = ?)
+       AND cp.value IS NOT NULL AND cp.value != ''`
+  );
+
+  // Build implemented-requirements with implementation-status prop, by-components, and set-parameters
+  const controlImpls = implementations.map((impl) => {
+    // Get set params for this control
+    const setParams = loadParams.all(impl.control_native_id, impl.catalog_short_name) as Array<{ param_id: string; value: string }>;
+
+    return {
+      uuid: generateUuid(),
+      'control-id': impl.control_native_id,
+      props: [
+        {
+          name: 'implementation-status',
+          value: statusMap[impl.status] ?? 'planned',
+        },
+        ...(impl.responsible_role
+          ? [{ name: 'responsible-role', value: impl.responsible_role }]
+          : []),
+      ],
+      ...(setParams.length > 0 ? {
+        'set-parameters': setParams.map((sp) => ({
+          'param-id': sp.param_id,
+          values: [sp.value],
+        })),
+      } : {}),
+      'by-components': [
+        {
+          'component-uuid': thisSystemUuid,
+          uuid: generateUuid(),
+          description: impl.statement,
+        },
+      ],
+    };
+  });
 
   const doc = {
     'system-security-plan': {

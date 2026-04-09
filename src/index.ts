@@ -1,5 +1,11 @@
 #!/usr/bin/env node
 
+// Handle EPIPE when piping output to head/tail/grep etc.
+process.stdout.on('error', (err: NodeJS.ErrnoException) => {
+  if (err.code === 'EPIPE') process.exit(0);
+  throw err;
+});
+
 import { Command } from 'commander';
 import { registerOrgInit } from './commands/org/init.js';
 import { registerScopeCommands } from './commands/org/scope.js';
@@ -10,6 +16,7 @@ import { registerCatalogDiff } from './commands/catalog/diff.js';
 import { registerCatalogUpdate } from './commands/catalog/update.js';
 import { registerCatalogWatch } from './commands/catalog/watch.js';
 import { registerCatalogImpact } from './commands/catalog/impact.js';
+import { registerCatalogRefresh } from './commands/catalog/refresh.js';
 import { registerMappingCreate } from './commands/mapping/create.js';
 import { registerMappingImport } from './commands/mapping/import.js';
 import { registerMappingList } from './commands/mapping/list.js';
@@ -65,6 +72,7 @@ registerCatalogDiff(catalogCommand);
 registerCatalogUpdate(catalogCommand);
 registerCatalogWatch(catalogCommand);
 registerCatalogImpact(catalogCommand);
+registerCatalogRefresh(catalogCommand);
 
 // ---------------------------------------------------------------
 // mapping commands

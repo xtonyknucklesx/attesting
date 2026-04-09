@@ -6,8 +6,13 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  test:
+  # ─── Job 1: Build, typecheck, test ────────────────────────────
+  build-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -19,12 +24,30 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - run: npm ci
-      - run: npm run lint
-      - run: npm test
 
-  build:
+      - name: Typecheck (tsc --noEmit)
+        run: npm run lint
+
+      - name: Build backend (tsc)
+        run: npm run build
+
+      - name: Build frontend (vite)
+        run: npx vite build --config vite.web.config.mts
+
+      - name: Run test suite
+        run: npm test
+
+      - name: Verify package-lock.json in sync
+        run: |
+          npm ci --ignore-scripts 2>&1 | tee /tmp/npm-ci.log
+          if grep -q "npm warn" /tmp/npm-ci.log; then
+            echo "::warning::package-lock.json may be out of sync"
+          fi
+
+  # ─── Job 2: Security intelligence ────────────────────────────
+  security:
     runs-on: ubuntu-latest
-    needs: test
+    needs: build-and-test
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,4 +55,180 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci
-      - run: npm run build
+
+      - name: npm audit (critical vulnerabilities)
+        run: npm audit --audit-level=critical || true
+        # Non-blocking — report but don't fail on non-critical
+
+      - name: Scan for hardcoded secrets
+        run: |
+          echo "Scanning for hardcoded secrets in source..."
+          FOUND=0
+          # Patterns that indicate leaked credentials
+          PATTERNS='AKIA[0-9A-Z]{16}|sk-[a-zA-Z0-9]{20,}|password\s*=\s*["\x27][^"\x27]{4,}|postgresql://[^\s]+|mongodb(\+srv)?://[^\s]+|PRIVATE KEY|Bearer [a-zA-Z0-9\-._~+/]+=*'
+
+          if grep -rEn "$PATTERNS" src/ --include='*.ts' --include='*.tsx' \
+             --exclude-dir=node_modules --exclude-dir=dist \
+             | grep -v '\.test\.' | grep -v 'placeholder' | grep -v '// example'; then
+            echo "::error::Potential hardcoded secrets found in source code"
+            FOUND=1
+          fi
+
+          if [ $FOUND -eq 1 ]; then exit 1; fi
+          echo "No hardcoded secrets found."
+
+      - name: Scan for SQL injection risks
+        run: |
+          echo "Scanning for SQL string concatenation..."
+          FOUND=0
+          # Look for template literals or + concatenation in SQL contexts
+          # Exclude schema.sql, test files, and the known-safe parameterized patterns
+          if grep -rPn '\.(?:exec|run|prepare)\s*\(\s*`' src/ --include='*.ts' \
+             --exclude-dir=node_modules --exclude='schema.sql' \
+             | grep -v '\.test\.' \
+             | grep -v '\$\{scopeFilter\}' \
+             | grep -v '\$\{scopeFilterMapped\}' \
+             | grep -v '\$\{catalogFilter\}' \
+             | grep -v '\$\{where\}' \
+             | grep -v '\$\{conditions' \
+             | grep -v '\$\{fields'; then
+            echo "::warning::Potential SQL injection patterns found — review manually"
+          fi
+          echo "SQL injection scan complete."
+
+      - name: Check for sensitive files in repo
+        run: |
+          echo "Checking for files that should be gitignored..."
+          FOUND=0
+          # Database files
+          if git ls-files '*.db' '*.sqlite' '*.sqlite3' | grep -q .; then
+            echo "::error::Database files found in repo"
+            git ls-files '*.db' '*.sqlite' '*.sqlite3'
+            FOUND=1
+          fi
+          # Local data directory
+          if git ls-files 'data/local/*' | grep -q .; then
+            echo "::error::data/local/ files found in repo (should be gitignored)"
+            FOUND=1
+          fi
+          if [ $FOUND -eq 1 ]; then exit 1; fi
+          echo "No sensitive files found."
+
+      - name: Check catalog file sizes
+        run: |
+          echo "Checking catalog file sizes..."
+          for f in data/catalogs/*.csv data/catalogs/*.json; do
+            if [ -f "$f" ]; then
+              SIZE=$(stat -c%s "$f" 2>/dev/null || stat -f%z "$f" 2>/dev/null)
+              SIZE_KB=$((SIZE / 1024))
+              if [ "$SIZE_KB" -gt 500 ]; then
+                echo "::warning file=$f::Large catalog file: ${SIZE_KB}KB (>500KB) — verify this doesn't contain copyrighted content"
+              fi
+            fi
+          done
+          echo "Catalog size check complete."
+
+  # ─── Job 3: Accessibility scan ───────────────────────────────
+  accessibility:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Scan for accessibility issues
+        run: |
+          echo "Scanning React components for accessibility issues..."
+          ERRORS=0
+          WARNINGS=0
+
+          # Critical: div/span with onClick but no role
+          echo "--- Checking: interactive elements without role ---"
+          DIVS=$(grep -rn 'onClick' src/web/client/ --include='*.tsx' \
+            | grep -E '<(div|span)\s' \
+            | grep -v 'role=' \
+            | grep -v '\.test\.' || true)
+          if [ -n "$DIVS" ]; then
+            echo "$DIVS" | while IFS= read -r line; do
+              FILE=$(echo "$line" | cut -d: -f1)
+              LINE=$(echo "$line" | cut -d: -f2)
+              echo "::error file=$FILE,line=$LINE::div/span with onClick missing role attribute"
+            done
+            ERRORS=$((ERRORS + $(echo "$DIVS" | wc -l)))
+          fi
+
+          # Critical: img without alt
+          echo "--- Checking: images without alt text ---"
+          IMGS=$(grep -rn '<img ' src/web/client/ --include='*.tsx' \
+            | grep -v 'alt=' || true)
+          if [ -n "$IMGS" ]; then
+            echo "$IMGS" | while IFS= read -r line; do
+              FILE=$(echo "$line" | cut -d: -f1)
+              LINE=$(echo "$line" | cut -d: -f2)
+              echo "::error file=$FILE,line=$LINE::img element missing alt attribute"
+            done
+            ERRORS=$((ERRORS + $(echo "$IMGS" | wc -l)))
+          fi
+
+          # Warning: input without associated label
+          echo "--- Checking: inputs without labels ---"
+          INPUTS=$(grep -rn '<input\b' src/web/client/ --include='*.tsx' \
+            | grep -v 'aria-label' \
+            | grep -v 'id=' \
+            | grep -v '\.test\.' || true)
+          if [ -n "$INPUTS" ]; then
+            echo "$INPUTS" | while IFS= read -r line; do
+              FILE=$(echo "$line" | cut -d: -f1)
+              LINE=$(echo "$line" | cut -d: -f2)
+              echo "::warning file=$FILE,line=$LINE::input may be missing associated label (no aria-label or id for htmlFor)"
+            done
+            WARNINGS=$((WARNINGS + $(echo "$INPUTS" | wc -l)))
+          fi
+
+          # Warning: button without accessible text
+          echo "--- Checking: buttons without accessible text ---"
+          BTNS=$(grep -rPn '<button[^>]*/?>' src/web/client/ --include='*.tsx' \
+            | grep -v 'aria-label' \
+            | grep -v '>[^<]' \
+            | grep -v '\.test\.' || true)
+          # This is a heuristic — some buttons have text children not on the same line
+          if [ -n "$BTNS" ]; then
+            WARNINGS=$((WARNINGS + $(echo "$BTNS" | wc -l)))
+          fi
+
+          echo ""
+          echo "Accessibility scan complete."
+          echo "Errors: $ERRORS, Warnings: $WARNINGS"
+          if [ $ERRORS -gt 0 ]; then
+            echo "::error::$ERRORS critical accessibility issues found"
+            exit 1
+          fi
+
+  # ─── Job 4: OSCAL validation ─────────────────────────────────
+  oscal-validation:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+
+      - name: Validate OSCAL export pipeline
+        run: npx tsx scripts/ci-oscal-validate.ts
+
+  # ─── Job 5: Catalog integrity ────────────────────────────────
+  catalog-integrity:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+
+      - name: Verify catalog data integrity
+        run: npx tsx scripts/ci-catalog-integrity.ts

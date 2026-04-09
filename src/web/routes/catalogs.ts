@@ -112,5 +112,69 @@ export function catalogRoutes(): Router {
     });
   });
 
+  // GET /api/catalogs/:shortName/controls/:controlId/params — get params for a control
+  router.get('/:shortName/controls/:controlId/params', (req, res) => {
+    const database = db.getDb();
+    const { shortName, controlId } = req.params;
+
+    const control = database
+      .prepare(
+        `SELECT c.id FROM controls c JOIN catalogs cat ON c.catalog_id = cat.id
+         WHERE cat.short_name = ? AND c.control_id = ?`
+      )
+      .get(shortName, controlId) as { id: string } | undefined;
+
+    if (!control) {
+      res.status(404).json({ error: `Control "${shortName}:${controlId}" not found` });
+      return;
+    }
+
+    // Ensure table exists
+    database.exec(`CREATE TABLE IF NOT EXISTS control_params (
+      id TEXT PRIMARY KEY, control_id TEXT NOT NULL, param_id TEXT NOT NULL,
+      label TEXT, description TEXT, default_value TEXT, value TEXT, set_by TEXT, set_at TEXT,
+      UNIQUE(control_id, param_id)
+    )`);
+
+    const params = database
+      .prepare('SELECT * FROM control_params WHERE control_id = ? ORDER BY param_id')
+      .all(control.id);
+
+    res.json(params);
+  });
+
+  // PUT /api/catalogs/:shortName/controls/:controlId/params/:paramId — set a param value
+  router.put('/:shortName/controls/:controlId/params/:paramId', (req, res) => {
+    const database = db.getDb();
+    const { shortName, controlId, paramId } = req.params;
+    const { value, set_by } = req.body;
+
+    const control = database
+      .prepare(
+        `SELECT c.id FROM controls c JOIN catalogs cat ON c.catalog_id = cat.id
+         WHERE cat.short_name = ? AND c.control_id = ?`
+      )
+      .get(shortName, controlId) as { id: string } | undefined;
+
+    if (!control) {
+      res.status(404).json({ error: `Control not found` });
+      return;
+    }
+
+    const result = database
+      .prepare(
+        `UPDATE control_params SET value = ?, set_by = ?, set_at = datetime('now')
+         WHERE control_id = ? AND param_id = ?`
+      )
+      .run(value ?? null, set_by ?? null, control.id, paramId);
+
+    if (result.changes === 0) {
+      res.status(404).json({ error: `Parameter "${paramId}" not found for this control` });
+      return;
+    }
+
+    res.json({ updated: true });
+  });
+
   return router;
 }

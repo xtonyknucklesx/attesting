@@ -25,6 +25,14 @@ export const getControls = (shortName: string, params?: Record<string, string>) 
   );
 };
 
+// Control params
+export const getControlParams = (catalog: string, controlId: string) =>
+  request<any[]>(`/catalogs/${catalog}/controls/${controlId}/params`);
+export const setControlParam = (catalog: string, controlId: string, paramId: string, value: string, setBy?: string) =>
+  request<{ updated: boolean }>(`/catalogs/${catalog}/controls/${controlId}/params/${paramId}`, {
+    method: 'PUT', body: JSON.stringify({ value, set_by: setBy }),
+  });
+
 // Coverage
 export const getCoverage = (scopeName?: string) =>
   request<any[]>(scopeName ? `/coverage/${encodeURIComponent(scopeName)}` : '/coverage');
@@ -62,3 +70,46 @@ export const runExport = (format: string, catalog?: string, scope?: string) =>
 
 // Watches
 export const getWatches = () => request<any[]>('/watches');
+
+// Governance
+export const getPolicies = () => request<any[]>('/governance/policies');
+export const createPolicy = (data: Record<string, unknown>) =>
+  request<{ id: string }>('/governance/policies', { method: 'POST', body: JSON.stringify(data) });
+export const getPolicy = (id: string) => request<any>(`/governance/policies/${id}`);
+export const updatePolicy = (id: string, data: Record<string, unknown>) =>
+  request<any>(`/governance/policies/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deletePolicy = (id: string) =>
+  request<any>(`/governance/policies/${id}`, { method: 'DELETE' });
+export const linkPolicyControls = (id: string, controlIds: string[]) =>
+  request<any>(`/governance/policies/${id}/controls`, { method: 'POST', body: JSON.stringify({ controlIds }) });
+export const getCommittees = () => request<any[]>('/governance/committees');
+export const createCommittee = (data: Record<string, unknown>) =>
+  request<{ id: string }>('/governance/committees', { method: 'POST', body: JSON.stringify(data) });
+export const getCommitteeMeetings = (id: string) => request<any[]>(`/governance/committees/${id}/meetings`);
+export const createMeeting = (id: string, data: Record<string, unknown>) =>
+  request<{ id: string }>(`/governance/committees/${id}/meetings`, { method: 'POST', body: JSON.stringify(data) });
+export const getRoles = () => request<any[]>('/governance/roles');
+export const createRole = (data: Record<string, unknown>) =>
+  request<{ id: string }>('/governance/roles', { method: 'POST', body: JSON.stringify(data) });
+export const updateRole = (id: string, data: Record<string, unknown>) =>
+  request<any>(`/governance/roles/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+
+// Risk
+export const getRisks = (params?: Record<string, string>) => {
+  const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+  return request<any[]>(`/risk/register${qs}`);
+};
+export const createRisk = (data: Record<string, unknown>) =>
+  request<{ id: string; risk_id: string }>('/risk/register', { method: 'POST', body: JSON.stringify(data) });
+export const getRisk = (id: string) => request<any>(`/risk/register/${id}`);
+export const updateRisk = (id: string, data: Record<string, unknown>) =>
+  request<any>(`/risk/register/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteRisk = (id: string) =>
+  request<any>(`/risk/register/${id}`, { method: 'DELETE' });
+export const linkRiskControls = (id: string, controlIds: string[]) =>
+  request<any>(`/risk/register/${id}/controls`, { method: 'POST', body: JSON.stringify({ controlIds }) });
+export const getRiskMatrix = () => request<any>('/risk/matrix');
+export const getRiskExceptions = () => request<any[]>('/risk/exceptions');
+export const createRiskException = (data: Record<string, unknown>) =>
+  request<{ id: string }>('/risk/exceptions', { method: 'POST', body: JSON.stringify(data) });
+export const getRiskDashboard = () => request<any>('/risk/dashboard');
