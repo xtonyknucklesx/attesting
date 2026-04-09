@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+:root {
+  --color-accent: #4F46E5;
+  --color-implemented: #22c55e;
+  --color-partial: #f59e0b;
+  --color-not-implemented: #ef4444;
+  --color-na: #9ca3af;
+  --color-planned: #3b82f6;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

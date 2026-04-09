@@ -1,0 +1,98 @@
+import express from 'express';
+import cors from 'cors';
+import rateLimit from 'express-rate-limit';
+import * as path from 'path';
+import * as fs from 'fs';
+import { db } from '../db/connection.js';
+import { catalogRoutes } from './routes/catalogs.js';
+import { mappingRoutes } from './routes/mappings.js';
+import { implementationRoutes } from './routes/implementations.js';
+import { coverageRoutes } from './routes/coverage.js';
+import { diffRoutes } from './routes/diff.js';
+import { exportRoutes } from './routes/export.js';
+import { orgRoutes } from './routes/org.js';
+import { watchRoutes } from './routes/watches.js';
+
+export interface ServerOptions {
+  port: number;
+  dev?: boolean;
+}
+
+export function createApp() {
+  const app = express();
+
+  // Middleware
+  app.use(express.json());
+  app.use(cors({ origin: ['http://localhost:5173', 'http://localhost:3000'] }));
+
+  // Rate limiting
+  const limiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 100,
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  app.use('/api', limiter);
+
+  // CSP headers
+  app.use((_req, res, next) => {
+    res.setHeader(
+      'Content-Security-Policy',
+      "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'"
+    );
+    next();
+  });
+
+  // Ensure DB is initialized
+  db.getDb();
+
+  // API routes
+  app.use('/api/org', orgRoutes());
+  app.use('/api/catalogs', catalogRoutes());
+  app.use('/api/mappings', mappingRoutes());
+  app.use('/api/implementations', implementationRoutes());
+  app.use('/api/coverage', coverageRoutes());
+  app.use('/api/diff', diffRoutes());
+  app.use('/api/export', exportRoutes());
+  app.use('/api/watches', watchRoutes());
+
+  return app;
+}
+
+export function startServer(options: ServerOptions): void {
+  const app = createApp();
+
+  // Serve static frontend in production mode
+  if (!options.dev) {
+    const staticDir = resolveStaticDir();
+    if (staticDir && fs.existsSync(staticDir)) {
+      app.use(express.static(staticDir));
+      // SPA fallback — serve index.html for all non-API routes
+      app.use((req, res, next) => {
+        if (req.path.startsWith('/api')) return next();
+        res.sendFile(path.join(staticDir, 'index.html'));
+      });
+    }
+  }
+
+  app.listen(options.port, () => {
+    const mode = options.dev ? 'dev' : 'production';
+    console.log(`\x1b[32m✔\x1b[0m Crosswalk server running at http://localhost:${options.port} (${mode})`);
+    if (options.dev) {
+      console.log(`  API: http://localhost:${options.port}/api`);
+      console.log(`  UI:  Start Vite dev server separately — npx vite --config vite.web.config.ts`);
+    }
+  });
+}
+
+function resolveStaticDir(): string | null {
+  const candidates = [
+    path.join(__dirname, '../../dist/web'),
+    path.join(__dirname, '../../../dist/web'),
+    path.join(process.cwd(), 'dist/web'),
+  ];
+  for (const dir of candidates) {
+    if (fs.existsSync(dir)) return dir;
+  }
+  return candidates[2]; // fallback
+}

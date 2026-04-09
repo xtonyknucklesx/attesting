@@ -28,6 +28,7 @@ import { registerExportSoa } from './commands/export/soa.js';
 import { registerAssessmentCreate } from './commands/assessment/create.js';
 import { registerAssessmentEvaluate } from './commands/assessment/evaluate.js';
 import { registerAssessmentPoam } from './commands/assessment/poam.js';
+import { registerServe } from './commands/web/serve.js';
 
 const program = new Command();
 
@@ -114,5 +115,10 @@ const assessmentCommand = program
 registerAssessmentCreate(assessmentCommand);
 registerAssessmentEvaluate(assessmentCommand);
 registerAssessmentPoam(assessmentCommand);
+
+// ---------------------------------------------------------------
+// web serve command (top-level)
+// ---------------------------------------------------------------
+registerServe(program);
 
 program.parse();
