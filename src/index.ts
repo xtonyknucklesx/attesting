@@ -39,6 +39,7 @@ import { registerAssessmentPoam } from './commands/assessment/poam.js';
 import { registerServe } from './commands/web/serve.js';
 import { registerRiskCommands } from './commands/risk/index.js';
 import { registerIntelCommands } from './commands/intel/index.js';
+import { registerDriftCommands } from './commands/drift/index.js';
 
 const program = new Command();
 
@@ -137,6 +138,11 @@ registerRiskCommands(program);
 // intel commands
 // ---------------------------------------------------------------
 registerIntelCommands(program);
+
+// ---------------------------------------------------------------
+// drift commands
+// ---------------------------------------------------------------
+registerDriftCommands(program);
 
 // ---------------------------------------------------------------
 // web serve command (top-level)
