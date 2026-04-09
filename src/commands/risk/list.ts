@@ -14,6 +14,9 @@ export function registerRiskList(riskCommand: Command): void {
     .option('--severity <severity>', 'Filter by inherent score threshold (e.g. 10)')
     .option('--owner <owner>', 'Filter by owner (substring match)')
     .option('--source-type <type>', 'Filter by source_type (threat_input, control_gap, etc.)')
+    .option('--category <category>', 'Filter by category')
+    .option('--above-appetite', 'Only show risks above the matrix appetite threshold')
+    .option('--json', 'Output as JSON')
     .action(runRiskList);
 }
 
@@ -22,6 +25,9 @@ interface RiskListOptions {
   severity?: string;
   owner?: string;
   sourceType?: string;
+  category?: string;
+  aboveAppetite?: boolean;
+  json?: boolean;
 }
 
 function runRiskList(options: RiskListOptions): void {
@@ -47,10 +53,22 @@ function runRiskList(options: RiskListOptions): void {
     sql += ' AND source_type = ?';
     params.push(options.sourceType);
   }
+  if (options.category) {
+    sql += ' AND category = ?';
+    params.push(options.category);
+  }
+  if (options.aboveAppetite) {
+    sql += ' AND (likelihood * impact) > (SELECT appetite_threshold FROM risk_matrix LIMIT 1)';
+  }
 
   sql += ' ORDER BY (likelihood * impact) DESC';
 
   const risks = database.prepare(sql).all(...params) as Risk[];
+
+  if (options.json) {
+    console.log(JSON.stringify(risks, null, 2));
+    return;
+  }
 
   if (risks.length === 0) {
     warn('No risks found matching filters.');

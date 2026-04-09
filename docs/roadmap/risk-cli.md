@@ -37,8 +37,6 @@
 - `exceptions create` validates risk and optional control existence before insert
 - `matrix` auto-creates default matrix if none exists
 
-**Not yet implemented in list.ts:** `--json` output, `--above-appetite` filter, `--category` filter. These should be added to match the spec.
-
 ## Exit Criteria
 
 - [ ] `crosswalk risk --help` shows all 6 subcommands
