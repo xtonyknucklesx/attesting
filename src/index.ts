@@ -40,6 +40,7 @@ import { registerServe } from './commands/web/serve.js';
 import { registerRiskCommands } from './commands/risk/index.js';
 import { registerIntelCommands } from './commands/intel/index.js';
 import { registerDriftCommands } from './commands/drift/index.js';
+import { registerConnectorCommands } from './commands/connector/index.js';
 
 const program = new Command();
 
@@ -143,6 +144,11 @@ registerIntelCommands(program);
 // drift commands
 // ---------------------------------------------------------------
 registerDriftCommands(program);
+
+// ---------------------------------------------------------------
+// connector commands
+// ---------------------------------------------------------------
+registerConnectorCommands(program);
 
 // ---------------------------------------------------------------
 // web serve command (top-level)

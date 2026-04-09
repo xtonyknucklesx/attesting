@@ -11,7 +11,7 @@ Each item links to a detailed spec in `docs/roadmap/`. Specs define scope, files
 | 1A | Risk CLI (list, create, update, link, exceptions, matrix) | ✅ | [risk-cli.md](risk-cli.md) |
 | 1B | Intel CLI (list, submit, promote, corroborate, shadow) | ✅ | [intel-cli.md](intel-cli.md) |
 | 1C | Drift CLI (list, check, dispose, tasks, schedule) | ✅ | [drift-cli.md](drift-cli.md) |
-| 1D | Connector CLI (list, add, sync, log, health) | 📋 | [connector-cli.md](connector-cli.md) |
+| 1D | Connector CLI (list, add, sync, log, health) | ✅ | [connector-cli.md](connector-cli.md) |
 
 ## Phase 2 — Web UI Coverage
 
