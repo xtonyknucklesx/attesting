@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3';
 import type { PropagationContext } from './types.js';
 import { logEntry } from './types.js';
 import { createDriftAlert } from '../drift/alert-writer.js';
+import { generateUuid } from '../../utils/uuid.js';
 
 /**
  * Recalculates residual risk scores for all risks mitigated by
@@ -117,7 +118,7 @@ export function createRiskFromThreat(
     return null;
   }
 
-  const { generateUuid } = require('../../utils/uuid.js');
+  // generateUuid imported at top of file
   const count = (db.prepare('SELECT COUNT(*) AS c FROM risks').get() as { c: number }).c;
   const riskRef = `RISK-${String(count + 1).padStart(3, '0')}`;
   const id = generateUuid();

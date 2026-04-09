@@ -26,11 +26,11 @@ Each item links to a detailed spec in `docs/roadmap/`. Specs define scope, files
 
 | # | Feature | Status | Spec |
 |---|---------|--------|------|
-| 3A | Propagation engine tests | 📋 | [test-propagation.md](test-propagation.md) |
-| 3B | Disposition pipeline tests | 📋 | [test-disposition.md](test-disposition.md) |
-| 3C | Intel service tests | 📋 | [test-intel.md](test-intel.md) |
-| 3D | Drift & connector tests | 📋 | [test-drift-connectors.md](test-drift-connectors.md) |
-| 3E | API integration tests | 📋 | [test-api-integration.md](test-api-integration.md) |
+| 3A | Propagation engine tests | ✅ | [test-propagation.md](test-propagation.md) |
+| 3B | Disposition pipeline tests | ✅ | [test-disposition.md](test-disposition.md) |
+| 3C | Intel service tests | ✅ | [test-intel.md](test-intel.md) |
+| 3D | Drift & connector tests | ✅ | [test-drift-connectors.md](test-drift-connectors.md) |
+| 3E | API integration tests | ✅ | [test-api-integration.md](test-api-integration.md) |
 
 ## Phase 4 — Connector Ecosystem
 
