@@ -5,6 +5,53 @@ import { resolveControl } from '../../mappers/resolver.js';
 export function mappingRoutes(): Router {
   const router = Router();
 
+  // GET /api/mappings/summary — aggregate stats + per-source-control counts
+  router.get('/summary', (_req, res) => {
+    const database = db.getDb();
+
+    const totalRow = database
+      .prepare('SELECT COUNT(*) AS total FROM control_mappings')
+      .get() as { total: number };
+
+    // Breakdown by target framework
+    const byTarget = database
+      .prepare(
+        `SELECT cat.short_name, cat.name, COUNT(*) AS count
+         FROM control_mappings cm
+         JOIN controls c ON cm.target_control_id = c.id
+         JOIN catalogs cat ON c.catalog_id = cat.id
+         GROUP BY cat.short_name, cat.name
+         ORDER BY count DESC`
+      )
+      .all() as { short_name: string; name: string; count: number }[];
+
+    // Per source-control mapping counts (for the clickable table)
+    // Include impl status for the source control
+    const org = database.prepare('SELECT id FROM organizations LIMIT 1').get() as { id: string } | undefined;
+
+    const sourceControls = database
+      .prepare(
+        `SELECT
+           src.control_id,
+           src_cat.short_name AS catalog_short_name,
+           src.title,
+           COUNT(*) AS mapping_count,
+           ${org ? `(SELECT i.status FROM implementations i WHERE i.primary_control_id = src.id AND i.org_id = '${org.id}' LIMIT 1)` : 'NULL'} AS impl_status
+         FROM control_mappings cm
+         JOIN controls src ON cm.source_control_id = src.id
+         JOIN catalogs src_cat ON src.catalog_id = src_cat.id
+         GROUP BY src.id, src.control_id, src_cat.short_name, src.title
+         ORDER BY src_cat.short_name, src.sort_order, src.control_id`
+      )
+      .all();
+
+    res.json({
+      total: totalRow.total,
+      byTarget,
+      sourceControls,
+    });
+  });
+
   // GET /api/mappings/list?source=X&target=Y
   router.get('/list', (req, res) => {
     const database = db.getDb();
@@ -73,21 +120,45 @@ export function mappingRoutes(): Router {
     const direct = resolved.filter((m) => !m.isTransitive);
     const transitive = resolved.filter((m) => m.isTransitive);
 
-    // Enrich with implementation status
+    // Enrich with implementation status + full control details for detail panel
     const org = database.prepare('SELECT id FROM organizations LIMIT 1').get() as { id: string } | undefined;
+
+    const getControlDetail = database.prepare(
+      `SELECT c.id, c.control_id, c.title, c.description, c.metadata,
+              cat.short_name AS catalog_short_name, cat.name AS catalog_name
+       FROM controls c
+       JOIN catalogs cat ON c.catalog_id = cat.id
+       WHERE c.id = ?`
+    );
+    const getImplDetail = org ? database.prepare(
+      `SELECT id, status, statement, responsible_role, responsibility_type
+       FROM implementations WHERE primary_control_id = ? AND org_id = ? LIMIT 1`
+    ) : null;
+
     const enriched = resolved.map((m) => {
-      let implStatus: string | null = null;
-      if (org) {
-        const impl = database
-          .prepare('SELECT status FROM implementations WHERE primary_control_id = ? AND org_id = ? LIMIT 1')
-          .get(m.controlId, org.id) as { status: string } | undefined;
-        implStatus = impl?.status ?? null;
-      }
-      return { ...m, implStatus };
+      const detail = getControlDetail.get(m.controlId) as Record<string, unknown> | undefined;
+      const impl = getImplDetail?.get(m.controlId, org!.id) as Record<string, unknown> | undefined;
+      return {
+        ...m,
+        implStatus: (impl?.status as string) ?? null,
+        implStatement: (impl?.statement as string) ?? null,
+        implId: (impl?.id as string) ?? null,
+        title: (detail?.title as string) ?? '',
+        description: (detail?.description as string) ?? '',
+        catalogName: (detail?.catalog_name as string) ?? '',
+      };
     });
 
+    // Get impl status for the root control too
+    const rootImpl = getImplDetail?.get(control.id, org!.id) as Record<string, unknown> | undefined;
+
     res.json({
-      control,
+      control: {
+        ...control,
+        implStatus: (rootImpl?.status as string) ?? null,
+        implStatement: (rootImpl?.statement as string) ?? null,
+        implId: (rootImpl?.id as string) ?? null,
+      },
       direct: enriched.filter((m) => !m.isTransitive),
       transitive: enriched.filter((m) => m.isTransitive),
     });

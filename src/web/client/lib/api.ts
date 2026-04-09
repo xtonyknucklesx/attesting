@@ -30,6 +30,8 @@ export const getCoverage = (scopeName?: string) =>
   request<any[]>(scopeName ? `/coverage/${encodeURIComponent(scopeName)}` : '/coverage');
 
 // Mappings
+export const getMappingSummary = () =>
+  request<{ total: number; byTarget: any[]; sourceControls: any[] }>('/mappings/summary');
 export const resolveMappings = (catalog: string, controlId: string, depth?: number) =>
   request<{ control: any; direct: any[]; transitive: any[] }>(
     `/mappings/resolve/${catalog}/${controlId}${depth ? `?depth=${depth}` : ''}`

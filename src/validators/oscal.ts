@@ -176,6 +176,7 @@ function validateSsp(data: Record<string, unknown>, r: FindingCollector, strict:
   }
 
   // --- System Implementation ---
+  let componentUuids = new Set<string>();
   const impl = ssp['system-implementation'] as Record<string, unknown> | undefined;
   if (!impl) {
     r.error('SSP-010', "Missing 'system-implementation' section");
@@ -191,7 +192,7 @@ function validateSsp(data: Record<string, unknown>, r: FindingCollector, strict:
     }
 
     // Collect component UUIDs for reference checking
-    var componentUuids = new Set(components.map((c) => c.uuid as string).filter(Boolean));
+    componentUuids = new Set(components.map((c) => c.uuid as string).filter(Boolean));
   }
 
   // --- Control Implementation ---

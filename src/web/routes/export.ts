@@ -35,7 +35,7 @@ export function exportRoutes(): Router {
 
     try {
       let outputPath: string;
-      let result: { rows?: number; exported?: number; controls?: number };
+      let result: Record<string, unknown>;
 
       switch (format) {
         case 'csv': {
