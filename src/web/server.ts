@@ -14,6 +14,12 @@ import { orgRoutes } from './routes/org.js';
 import { watchRoutes } from './routes/watches.js';
 import { governanceRoutes } from './routes/governance.js';
 import { riskRoutes } from './routes/risk.js';
+import { intelRoutes } from './routes/intel.js';
+import { driftRoutes } from './routes/drift.js';
+import { assetRoutes } from './routes/assets.js';
+import { connectorRoutes } from './routes/connectors.js';
+import { ownerRoutes } from './routes/owners.js';
+import { auditRoutes } from './routes/audit.js';
 
 export interface ServerOptions {
   port: number;
@@ -59,6 +65,12 @@ export function createApp() {
   app.use('/api/watches', watchRoutes());
   app.use('/api/governance', governanceRoutes());
   app.use('/api/risk', riskRoutes());
+  app.use('/api/intel', intelRoutes());
+  app.use('/api/drift', driftRoutes());
+  app.use('/api/assets', assetRoutes());
+  app.use('/api/connectors', connectorRoutes());
+  app.use('/api/owners', ownerRoutes());
+  app.use('/api/audit', auditRoutes());
 
   return app;
 }

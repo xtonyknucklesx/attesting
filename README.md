@@ -2,37 +2,58 @@
 
 # Crosswalk
 
-OSCAL-native compliance control platform. Write your control implementations once, map them across every framework, and export to any format.
+Open-source, OSCAL-native GRC platform. Map controls across frameworks, manage risk with live threat intelligence, and detect compliance drift — all from a single source of truth.
 
 ## The Problem
 
-Every compliance team answers the same security questions dozens of different ways across different frameworks. SIG asks "Do you have an access control policy?" ISO 27001 asks the same thing with different words. NIST 800-171 asks it again. CMMC asks it again. Each time, someone re-answers from scratch or copy-pastes from a spreadsheet and hopes nothing drifted.
+Compliance teams answer the same security questions across dozens of frameworks using disconnected spreadsheets. Risk registers live in one tool, policies in another, evidence in a shared drive, threat intel in an email thread. When a policy changes, nobody knows which controls are affected. When a new CVE drops, nobody knows which assets are exposed or which risk scores need updating. When an auditor asks for evidence, everyone scrambles.
 
-The tooling makes it worse. The industry-standard SIG Manager is a macro-enabled Excel workbook. ISO 27001 SOAs live in spreadsheets. CMMC self-assessments are spreadsheets. There's no single source of truth, no cross-framework mapping, and no way to write an answer once and have it resolve everywhere.
+The industry-standard tooling — SIG Manager in Excel, SOAs in spreadsheets, risk registers in SharePoint — makes this worse. There's no single source of truth, no cross-module propagation, and no way for a change in one area to automatically surface its impact everywhere else.
 
 ## What Crosswalk Does
 
-Crosswalk replaces spreadsheet-based compliance workflows with an OSCAL-native data model:
+Crosswalk treats governance, risk, and compliance as a connected graph, not three separate tabs.
 
-1. **Import** control catalogs from any framework (NIST 800-171, ISO 27001, SIG, CMMC, NISPOM, or custom)
-2. **Map** controls across frameworks (SIG question A.1 ↔ ISO 27001 A.5.1 ↔ NIST 800-171 3.1.1)
-3. **Implement** — write each control implementation once, tag it to a control, and let mappings resolve the rest
-4. **Export** in any format: SIG-compatible questionnaires, ISO 27001 SOA workbooks, CMMC self-assessments, OSCAL JSON, or PDF reports
-5. **Assess** — track compliance status, findings, evidence, and POA&M items per control
+**Compliance engine** — Import control catalogs from any framework. Map controls across frameworks so one implementation statement resolves everywhere. Export in any format: SIG questionnaires, OSCAL JSON, ISO SOAs, PDF reports, CSV.
+
+**Governance module** — Track policies with granular section-level drift detection. When a policy section changes, every control implementation referencing it gets flagged automatically. Manage committees, meeting minutes, and role assignments.
+
+**Risk management** — Maintain a risk register with a configurable 5×5 matrix. Link risks to controls and assets. Residual scores recalculate automatically when control effectiveness changes. Risk exceptions with expiry tracking.
+
+**Threat intelligence** — Ingest feeds from CISA KEV, STIX/TAXII, NVD, and sector ISACs. Threats auto-correlate against your asset inventory by platform and propagate through the risk module. Manual intel enters as provisional, runs a shadow impact analysis showing what *would* change if confirmed, and promotes to a full threat when corroborated.
+
+**Asset inventory** — Track systems, endpoints, applications, and services with platform metadata, data classification, and boundary assignment. Assets link to risks, threats, and control implementations for full scope visibility.
+
+**Drift detection** — A background engine monitors the entire graph for misalignment: stale policy references, expired evidence, risk threshold breaches, expiring exceptions, connector failures. Analysts respond to drift alerts using natural language, and dispositions route through a supervisor approval workflow.
+
+**Integration layer** — Connector adapter framework for external systems. CISA KEV adapter ships built-in. Architecture supports SIEM, CMDB, ticketing, identity, SBOM, vulnerability scanner, and cloud provider connectors. Every sync is logged and health-checked.
 
 ## Architecture
 
-- **CLI-first** — scriptable, composable, CI/CD-ready
-- **SQLite backend** — local-first, single file, no server dependencies
+```
+External Intel ──→ Risk Module ──→ Governance
+  (CISA, STIX,      (hub)          (policies, sections)
+   NVD, ISACs)         │
+                       ├──→ Compliance
+                       │    (controls, evidence, mappings)
+                       │
+                       └──→ Asset Inventory
+                            (systems, platforms, boundaries)
+
+       Drift Engine watches all modules for misalignment
+```
+
+- **CLI-first** — scriptable, CI/CD-ready, 23+ commands
+- **Web UI** — React/Tailwind dashboard with dark mode
+- **SQLite backend** — local-first, single file, zero config
 - **OSCAL-native** — data model aligns with NIST OSCAL 1.1.2
-- **Framework-agnostic** — any control catalog, any mapping, any export format
-- **TypeScript/Node** — single language across CLI, importers, exporters
+- **TypeScript** — single language across CLI, API, importers, exporters
+- **Migration system** — numbered SQL migrations applied automatically
 
 ## Quick Start
 
 ```bash
-# Install
-git clone https://github.com/arossi3/crosswalk.git
+git clone https://github.com/xtonyknucklesx/crosswalk.git
 cd crosswalk
 npm install
 npm run build
@@ -42,17 +63,20 @@ crosswalk org init --name "My Company"
 crosswalk scope create --name "My Product" --type product
 
 # Import frameworks
-crosswalk catalog import --format oscal --file data/catalogs/nist-800-171-r2.json \
-  --name "NIST 800-171" --short-name nist-800-171-r2
+crosswalk catalog import --format oscal \
+  --file data/catalogs/nist-800-53-r5.json \
+  --name "NIST 800-53" --short-name nist-800-53-r5
 
-crosswalk catalog import --format sig --file path/to/your/SIG_Manager_2026.xlsm \
+crosswalk catalog import --format sig \
+  --file path/to/SIG_Manager_2026.xlsm \
   --scope-level lite --name "SIG Lite 2026" --short-name sig-lite-2026
 
 # Import cross-framework mappings
-crosswalk mapping import --format csv --file data/mappings/sig-to-nist800171.csv \
-  --source-catalog sig-lite-2026 --target-catalog nist-800-171-r2
+crosswalk mapping import --format csv \
+  --file data/mappings/sig-to-nist800171.csv \
+  --source-catalog sig-lite-2026 --target-catalog nist-800-171-r3
 
-# Add an implementation
+# Add an implementation (resolves across all mapped frameworks)
 crosswalk impl add \
   --control sig-lite-2026:A.1 \
   --scope "My Product" \
@@ -60,69 +84,103 @@ crosswalk impl add \
   --response Yes \
   --statement "We maintain a formalized risk governance policy approved by the board."
 
-# See what that one implementation covers across frameworks
+# Check what that implementation covers
 crosswalk mapping resolve sig-lite-2026:A.1
 
-# Check coverage
+# Check coverage across all frameworks
 crosswalk impl status --scope "My Product"
 
-# Export as SIG Response SIG
+# Export
 crosswalk export sig --catalog sig-lite-2026 --scope "My Product" \
   --format response-sig --output my-sig-response.xlsm
-
-# Export as OSCAL
 crosswalk export oscal --type component-definition --scope "My Product" \
   --output my-component.json
+
+# Start the web UI
+crosswalk serve --port 3000
 ```
+
+## Bundled Catalogs
+
+Crosswalk ships with 14 catalogs covering 3,206 controls:
+
+| Framework | Controls | Source Format |
+|-----------|----------|---------------|
+| NIST SP 800-53 Rev 5 | 1,189 | OSCAL JSON |
+| NIST SP 800-171 Rev 3 | 110 | OSCAL JSON |
+| NIST CSF 2.0 | 106 | OSCAL JSON |
+| NIST SP 800-218 (SSDF) | 43 | OSCAL JSON |
+| NIST 800-53 Baselines (×4) | varies | OSCAL JSON |
+| SIG Lite 2026 | 135 | SIG .xlsm |
+| ISO/IEC 27001:2022 | 93+22 | CSV |
+| CMMC 2.0 Level 2 | 110 | CSV |
+| NISPOM 32 CFR 117 | varies | CSV |
+| GDPR | varies | CSV |
+| EU AI Act | varies | CSV |
+| CCPA/CPRA | varies | CSV |
+| HIPAA Security Rule | varies | CSV |
+| SOC 2 TSC | varies | CSV |
+| PCI DSS 4.0 | varies | CSV |
+
+282 cross-framework mappings ship pre-resolved with zero unresolved references.
 
 ## Data Model
 
-Four layers, all stored in a single SQLite database:
+Six interconnected layers, all in a single SQLite database:
 
-| Layer | What It Stores | Example |
-|-------|---------------|---------|
-| **Catalogs** | Controls from any framework | NIST 800-171 has 110 controls, SIG Lite has 135 questions |
-| **Mappings** | Cross-framework control relationships | SIG A.1 ↔ ISO 27001 A.5.1 (equivalent, high confidence) |
-| **Implementations** | How your org satisfies each control | "We enforce MFA via Okta with 12-hour session timeout" |
-| **Assessments** | Compliance status, findings, evidence, POA&M | Control 3.1.1: satisfied, evidence: MFA config screenshot |
+| Layer | What It Stores |
+|-------|---------------|
+| **Catalogs & Controls** | Controls from any framework, with full-text search and OSCAL parameters |
+| **Mappings** | Cross-framework control relationships (equivalent, subset, superset, related) |
+| **Implementations** | How your org satisfies each control — write once, resolve everywhere |
+| **Governance** | Policies with section-level hashing, committees, role assignments |
+| **Risk** | Risk register, matrix, exceptions, control linkage, asset exposure |
+| **Threat Intel** | Ingested feeds, manual intel with shadow impact, asset correlations |
 
-The key insight: **implementations resolve across frameworks through mappings.** Write one implementation for a SIG control, and if that SIG control maps to equivalent NIST, ISO, and CMMC controls, your coverage updates automatically across all of them.
+Supporting infrastructure: asset inventory, drift alerts, dispositions with NLP classification and approval workflow, integration connectors, and a full audit log.
 
-## Supported Frameworks
+## API
 
-| Framework | Import Format | Status |
-|-----------|--------------|--------|
-| NIST SP 800-171 Rev 2 | OSCAL JSON (NIST-published) | Planned |
-| NIST SP 800-53 Rev 5 | OSCAL JSON (NIST-published) | Planned |
-| SIG Lite / Core / Detail 2026 | SIG Manager .xlsm | Planned |
-| ISO/IEC 27001:2022 | CSV | Planned |
-| CMMC 2.0 Level 2 | CSV | Planned |
-| NISPOM 32 CFR 117 | CSV | Planned |
-| Any custom framework | CSV with configurable columns | Planned |
+The Express API exposes endpoints for all modules:
+
+| Endpoint | Module |
+|----------|--------|
+| `/api/catalogs` | Framework catalogs and controls |
+| `/api/mappings` | Cross-framework control mappings |
+| `/api/implementations` | Implementation statements |
+| `/api/coverage` | Coverage calculations |
+| `/api/governance` | Policies, committees, roles |
+| `/api/risk` | Risk register, matrix, exceptions |
+| `/api/intel` | Threat inputs and manual intel |
+| `/api/drift` | Drift alerts and dispositions |
+| `/api/assets` | Asset inventory |
+| `/api/connectors` | Integration connector management |
+| `/api/owners` | People and role assignments |
+| `/api/audit` | Immutable audit trail |
+| `/api/export` | OSCAL, SIG, CSV, PDF, SOA exports |
+| `/api/diff` | Framework catalog change detection |
 
 ## Export Formats
 
 | Format | Use Case |
 |--------|----------|
-| SIG Response SIG (.xlsm) | Send pre-answered questionnaire to customers |
-| SIG Questionnaire (.xlsm) | Send blank questionnaire to vendors |
-| OSCAL JSON | Machine-readable compliance data (component-definition, SSP, assessment-results, POA&M) |
-| ISO 27001 SOA (.xlsx) | Statement of Applicability for ISMS certification |
-| CMMC Self-Assessment (.xlsx) | CMMC Level 2 self-assessment workbook |
+| SIG Response (.xlsm) | Pre-answered questionnaire for customers |
+| OSCAL JSON | Machine-readable (component-definition, SSP, assessment-results, POA&M) |
+| ISO 27001 SOA (.xlsx) | Statement of Applicability |
 | PDF Report | Human-readable compliance summary |
-| CSV | Flat export for analysis, Jira import, or other tools |
+| CSV | Flat export for Jira, analysis, or other tools |
 
 ## Important: Copyrighted Content
 
-Crosswalk does **not** ship copyrighted framework content (e.g., SIG question text, ISO 27001 control text). The tool imports control text from your own licensed copies of these frameworks. Seed data in this repository contains only structural metadata (control IDs, risk domains, control families, mapping references) without proprietary question or requirement text.
+Crosswalk does **not** ship copyrighted framework content (e.g., SIG question text, ISO 27001 control text). The tool imports control text from your own licensed copies. Seed data contains only structural metadata (control IDs, risk domains, mapping references) without proprietary content.
 
 ## Project Status
 
-🚧 **Early development** — not yet functional. See [CROSSWALK_SPEC.md](docs/CROSSWALK_SPEC.md) for the full technical specification.
+Active development. The compliance engine (catalogs, mappings, implementations, assessments, exports) is functional. The governance, risk, and threat intelligence modules are being integrated. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get involved.
 
 ## Contributing
 
-Contributions welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, architecture guidelines, and what needs help.
 
 ## License
 
