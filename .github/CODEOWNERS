@@ -1,0 +1,12 @@
+# Default owner for everything
+* @xtonyknucklesx
+
+# Critical paths — require review for any changes
+src/db/                        @xtonyknucklesx
+src/db/schema.sql              @xtonyknucklesx
+src/db/migrations/             @xtonyknucklesx
+src/services/propagation/      @xtonyknucklesx
+src/services/import/           @xtonyknucklesx
+src/web/server.ts              @xtonyknucklesx
+.github/                       @xtonyknucklesx
+SECURITY.md                    @xtonyknucklesx
