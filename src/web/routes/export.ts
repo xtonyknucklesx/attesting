@@ -45,11 +45,12 @@ export function exportRoutes(): Router {
         }
         case 'oscal': {
           outputPath = path.join(exportDir, `crosswalk-${safeScope}-${timestamp}.json`);
-          result = exportOscalComponentDefinition({
-            scopeName: scope || 'Default',
-            catalogShortNames: catalog ? [catalog] : undefined,
+          result = exportOscalComponentDefinition(
+            scope || 'Default',
+            catalog ? [catalog] : [],
             outputPath,
-          }, database);
+            database
+          );
           break;
         }
         case 'sig': {
