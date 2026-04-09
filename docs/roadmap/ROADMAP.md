@@ -17,10 +17,10 @@ Each item links to a detailed spec in `docs/roadmap/`. Specs define scope, files
 
 | # | Feature | Status | Spec |
 |---|---------|--------|------|
-| 2A | Assets page | 📋 | [assets-page.md](assets-page.md) |
-| 2B | Intel page (threat feeds + manual intel) | 📋 | [intel-page.md](intel-page.md) |
-| 2C | Drift page (alerts + dispositions) | 📋 | [drift-page.md](drift-page.md) |
-| 2D | Connectors page | 📋 | [connectors-page.md](connectors-page.md) |
+| 2A | Assets page | ✅ | [assets-page.md](assets-page.md) |
+| 2B | Intel page (threat feeds + manual intel) | ✅ | [intel-page.md](intel-page.md) |
+| 2C | Drift page (alerts + dispositions) | ✅ | [drift-page.md](drift-page.md) |
+| 2D | Connectors page | ✅ | [connectors-page.md](connectors-page.md) |
 
 ## Phase 3 — Test Coverage
 

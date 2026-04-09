@@ -14,6 +14,10 @@ const ExportCenter = lazy(() => import('./components/exports/ExportCenter'));
 const GovernancePage = lazy(() => import('./components/governance/GovernancePage'));
 const RiskPage = lazy(() => import('./components/risk/RiskPage'));
 const ImportProprietary = lazy(() => import('./components/ImportProprietary'));
+const AssetsPage = lazy(() => import('./components/assets/AssetsPage'));
+const IntelPage = lazy(() => import('./components/intel/IntelPage'));
+const DriftPage = lazy(() => import('./components/drift/DriftPage'));
+const ConnectorsPage = lazy(() => import('./components/connectors/ConnectorsPage'));
 
 interface ToastCtx { add: (msg: string, type?: 'success' | 'error') => void }
 const ToastContext = createContext<ToastCtx>({ add: () => {} });
@@ -57,6 +61,10 @@ export default function App() {
                   <Route path="/implementations" element={<ImplWorkspace scope={scope} />} />
                   <Route path="/governance/*" element={<GovernancePage />} />
                   <Route path="/risk/*" element={<RiskPage />} />
+                  <Route path="/assets" element={<AssetsPage />} />
+                  <Route path="/intel/*" element={<IntelPage />} />
+                  <Route path="/drift/*" element={<DriftPage />} />
+                  <Route path="/connectors" element={<ConnectorsPage />} />
                   <Route path="/diff" element={<DiffViewer />} />
                   <Route path="/import" element={<ImportProprietary />} />
                   <Route path="/export" element={<ExportCenter scope={scope} />} />

@@ -113,3 +113,57 @@ export const getRiskExceptions = () => request<any[]>('/risk/exceptions');
 export const createRiskException = (data: Record<string, unknown>) =>
   request<{ id: string }>('/risk/exceptions', { method: 'POST', body: JSON.stringify(data) });
 export const getRiskDashboard = () => request<any>('/risk/dashboard');
+
+// Assets
+export const getAssets = (params?: Record<string, string>) => {
+  const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+  return request<any[]>(`/assets${qs}`);
+};
+export const getAsset = (id: string) => request<any>(`/assets/${id}`);
+export const createAsset = (data: Record<string, unknown>) =>
+  request<{ id: string }>('/assets', { method: 'POST', body: JSON.stringify(data) });
+export const updateAsset = (id: string, data: Record<string, unknown>) =>
+  request<any>(`/assets/${id}`, { method: 'PUT', body: JSON.stringify(data) });
+export const deleteAsset = (id: string) =>
+  request<any>(`/assets/${id}`, { method: 'DELETE' });
+
+// Intel
+export const getThreats = (params?: Record<string, string>) => {
+  const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+  return request<any[]>(`/intel/threats${qs}`);
+};
+export const getThreat = (id: string) => request<any>(`/intel/threats/${id}`);
+export const getManualIntel = () => request<any[]>('/intel/manual');
+export const submitManualIntel = (data: Record<string, unknown>) =>
+  request<any>('/intel/manual', { method: 'POST', body: JSON.stringify(data) });
+export const getShadowImpact = (id: string) => request<any>(`/intel/manual/${id}/shadow`);
+export const promoteIntel = (id: string, data?: Record<string, unknown>) =>
+  request<any>(`/intel/manual/${id}/promote`, { method: 'POST', body: JSON.stringify(data ?? {}) });
+
+// Drift
+export const getDriftAlerts = (params?: Record<string, string>) => {
+  const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+  return request<any[]>(`/drift/alerts${qs}`);
+};
+export const getDriftAlert = (id: string) => request<any>(`/drift/alerts/${id}`);
+export const getDriftDashboard = () => request<any>('/drift/dashboard');
+export const submitDisposition = (data: Record<string, unknown>) =>
+  request<any>('/drift/dispositions', { method: 'POST', body: JSON.stringify(data) });
+export const commitDisposition = (data: Record<string, unknown>) =>
+  request<any>('/drift/dispositions/commit', { method: 'POST', body: JSON.stringify(data) });
+export const getPendingDispositions = () => request<any[]>('/drift/dispositions/pending');
+
+// Connectors
+export const getConnectors = () => request<any[]>('/connectors');
+export const createConnector = (data: Record<string, unknown>) =>
+  request<{ id: string }>('/connectors', { method: 'POST', body: JSON.stringify(data) });
+export const triggerSync = (id: string, full = false) =>
+  request<any>(`/connectors/${id}/sync`, { method: 'POST', body: JSON.stringify({ full }) });
+export const getConnectorLogs = (id: string, limit = 20) =>
+  request<any[]>(`/connectors/${id}/logs?limit=${limit}`);
+export const runHealthcheck = (id: string) =>
+  request<any>(`/connectors/${id}/healthcheck`, { method: 'POST' });
+export const getAdapters = () => request<string[]>('/connectors/adapters');
+
+// Owners (shared)
+export const getOwners = () => request<any[]>('/owners');

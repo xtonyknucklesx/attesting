@@ -3,7 +3,8 @@ import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Library, GitCompareArrows, FileEdit,
   ArrowLeftRight, Download, Upload, Shield, ScrollText, AlertTriangle,
-  ChevronDown, ChevronRight, ShieldCheck, Scale, ClipboardCheck
+  ChevronDown, ChevronRight, ShieldCheck, Scale, ClipboardCheck,
+  Server, Radio, Plug
 } from 'lucide-react';
 
 interface NavItem {
@@ -36,6 +37,16 @@ const sections: NavSection[] = [
       { to: '/risk/matrix', label: 'Risk Matrix', icon: LayoutDashboard },
       { to: '/risk/exceptions', label: 'Exceptions', icon: ShieldCheck },
       { to: '/risk/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    ],
+  },
+  {
+    label: 'Operations',
+    icon: Shield,
+    items: [
+      { to: '/assets', label: 'Assets', icon: Server },
+      { to: '/intel/threats', label: 'Intel', icon: Radio },
+      { to: '/drift/dashboard', label: 'Drift', icon: Shield },
+      { to: '/connectors', label: 'Connectors', icon: Plug },
     ],
   },
   {
