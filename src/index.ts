@@ -38,6 +38,7 @@ import { registerAssessmentEvaluate } from './commands/assessment/evaluate.js';
 import { registerAssessmentPoam } from './commands/assessment/poam.js';
 import { registerServe } from './commands/web/serve.js';
 import { registerRiskCommands } from './commands/risk/index.js';
+import { registerIntelCommands } from './commands/intel/index.js';
 
 const program = new Command();
 
@@ -131,6 +132,11 @@ registerAssessmentPoam(assessmentCommand);
 // risk commands
 // ---------------------------------------------------------------
 registerRiskCommands(program);
+
+// ---------------------------------------------------------------
+// intel commands
+// ---------------------------------------------------------------
+registerIntelCommands(program);
 
 // ---------------------------------------------------------------
 // web serve command (top-level)
