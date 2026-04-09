@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard, Library, GitCompareArrows, FileEdit,
-  ArrowLeftRight, Download, Shield, ScrollText, AlertTriangle,
+  ArrowLeftRight, Download, Upload, Shield, ScrollText, AlertTriangle,
   ChevronDown, ChevronRight, ShieldCheck, Scale, ClipboardCheck
 } from 'lucide-react';
 
@@ -46,6 +46,7 @@ const sections: NavSection[] = [
       { to: '/mappings', label: 'Mappings', icon: GitCompareArrows },
       { to: '/implementations', label: 'Implementations', icon: FileEdit },
       { to: '/diff', label: 'Diff Viewer', icon: ArrowLeftRight },
+      { to: '/import', label: 'Import', icon: Upload },
       { to: '/export', label: 'Export', icon: Download },
     ],
   },

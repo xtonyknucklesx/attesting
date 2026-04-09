@@ -20,6 +20,7 @@ import { assetRoutes } from './routes/assets.js';
 import { connectorRoutes } from './routes/connectors.js';
 import { ownerRoutes } from './routes/owners.js';
 import { auditRoutes } from './routes/audit.js';
+import { importRoutes } from './routes/import.js';
 
 export interface ServerOptions {
   port: number;
@@ -71,6 +72,7 @@ export function createApp() {
   app.use('/api/connectors', connectorRoutes());
   app.use('/api/owners', ownerRoutes());
   app.use('/api/audit', auditRoutes());
+  app.use('/api/import', importRoutes());
 
   return app;
 }

@@ -17,6 +17,7 @@ import { registerCatalogUpdate } from './commands/catalog/update.js';
 import { registerCatalogWatch } from './commands/catalog/watch.js';
 import { registerCatalogImpact } from './commands/catalog/impact.js';
 import { registerCatalogRefresh } from './commands/catalog/refresh.js';
+import { registerImportProprietary } from './commands/catalog/import-proprietary.js';
 import { registerMappingCreate } from './commands/mapping/create.js';
 import { registerMappingImport } from './commands/mapping/import.js';
 import { registerMappingList } from './commands/mapping/list.js';
@@ -74,6 +75,7 @@ registerCatalogUpdate(catalogCommand);
 registerCatalogWatch(catalogCommand);
 registerCatalogImpact(catalogCommand);
 registerCatalogRefresh(catalogCommand);
+registerImportProprietary(catalogCommand);
 
 // ---------------------------------------------------------------
 // mapping commands

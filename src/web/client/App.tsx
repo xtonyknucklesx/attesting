@@ -13,6 +13,7 @@ const DiffViewer = lazy(() => import('./components/diff/DiffViewer'));
 const ExportCenter = lazy(() => import('./components/exports/ExportCenter'));
 const GovernancePage = lazy(() => import('./components/governance/GovernancePage'));
 const RiskPage = lazy(() => import('./components/risk/RiskPage'));
+const ImportProprietary = lazy(() => import('./components/ImportProprietary'));
 
 interface ToastCtx { add: (msg: string, type?: 'success' | 'error') => void }
 const ToastContext = createContext<ToastCtx>({ add: () => {} });
@@ -57,6 +58,7 @@ export default function App() {
                   <Route path="/governance/*" element={<GovernancePage />} />
                   <Route path="/risk/*" element={<RiskPage />} />
                   <Route path="/diff" element={<DiffViewer />} />
+                  <Route path="/import" element={<ImportProprietary />} />
                   <Route path="/export" element={<ExportCenter scope={scope} />} />
                 </Routes>
               </Suspense>
