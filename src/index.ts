@@ -36,6 +36,7 @@ import { registerAssessmentCreate } from './commands/assessment/create.js';
 import { registerAssessmentEvaluate } from './commands/assessment/evaluate.js';
 import { registerAssessmentPoam } from './commands/assessment/poam.js';
 import { registerServe } from './commands/web/serve.js';
+import { registerRiskCommands } from './commands/risk/index.js';
 
 const program = new Command();
 
@@ -123,6 +124,11 @@ const assessmentCommand = program
 registerAssessmentCreate(assessmentCommand);
 registerAssessmentEvaluate(assessmentCommand);
 registerAssessmentPoam(assessmentCommand);
+
+// ---------------------------------------------------------------
+// risk commands
+// ---------------------------------------------------------------
+registerRiskCommands(program);
 
 // ---------------------------------------------------------------
 // web serve command (top-level)
