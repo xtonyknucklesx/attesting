@@ -26,11 +26,13 @@ export function registerAssessmentEvaluate(assessmentCommand: Command): void {
     .command('evaluate')
     .description('Evaluate an assessment against current implementations')
     .requiredOption('--assessment <name-or-id>', 'Assessment name or ID')
+    .option('--json', 'Output as JSON')
     .action(runAssessmentEvaluate);
 }
 
 interface EvaluateOptions {
   assessment: string;
+  json?: boolean;
 }
 
 interface AssessmentRow {
@@ -235,6 +237,25 @@ function runAssessmentEvaluate(options: EvaluateOptions): void {
       assessment.id
     );
 
+  const coveragePct =
+    controls.length > 0
+      ? Math.round(((satisfied + naCount) / controls.length) * 100)
+      : 0;
+
+  if (options.json) {
+    const result = {
+      assessment: assessment.name,
+      totalControls: controls.length,
+      satisfied,
+      partial: partialCount,
+      notSatisfied,
+      notApplicable: naCount,
+      coveragePct,
+    };
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
   success(`Assessment "${assessment.name}" evaluation complete.`);
   log('');
   log(`  Total controls:     ${controls.length}`);
@@ -242,9 +263,5 @@ function runAssessmentEvaluate(options: EvaluateOptions): void {
   log(`  Partial:            ${partialCount}`);
   log(`  Not satisfied:      ${notSatisfied}`);
   log(`  Not applicable:     ${naCount}`);
-  const coveragePct =
-    controls.length > 0
-      ? Math.round(((satisfied + naCount) / controls.length) * 100)
-      : 0;
   log(`  Coverage:           ${coveragePct}%`);
 }

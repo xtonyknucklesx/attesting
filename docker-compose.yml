@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  crosswalk:
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - crosswalk-data:/root/.crosswalk
+    environment:
+      - NODE_ENV=production
+      - CROSSWALK_PORT=3000
+    restart: unless-stopped
+
+volumes:
+  crosswalk-data:

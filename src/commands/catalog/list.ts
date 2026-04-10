@@ -10,10 +10,15 @@ export function registerCatalogList(catalogCommand: Command): void {
   catalogCommand
     .command('list')
     .description('List all imported catalogs')
+    .option('--json', 'Output as JSON')
     .action(runCatalogList);
 }
 
-function runCatalogList(): void {
+interface CatalogListOptions {
+  json?: boolean;
+}
+
+function runCatalogList(options: CatalogListOptions): void {
   const database = db.getDb();
 
   const catalogs = database
@@ -32,6 +37,11 @@ function runCatalogList(): void {
     | 'source_format'
     | 'created_at'
   >[];
+
+  if (options.json) {
+    console.log(JSON.stringify(catalogs, null, 2));
+    return;
+  }
 
   if (catalogs.length === 0) {
     log('No catalogs imported yet. Use `crosswalk catalog import` to add one.');
