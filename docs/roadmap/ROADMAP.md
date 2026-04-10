@@ -37,7 +37,7 @@ Each item links to a detailed spec in `docs/roadmap/`. Specs define scope, files
 | # | Feature | Status | Spec |
 |---|---------|--------|------|
 | 4A | CrowdStrike Falcon adapter | 📋 | [adapter-crowdstrike.md](adapter-crowdstrike.md) |
-| 4B | NIST NVD adapter | 📋 | [adapter-nvd.md](adapter-nvd.md) |
+| 4B | NIST NVD adapter | ✅ | [adapter-nvd.md](adapter-nvd.md) |
 | 4C | ServiceNow adapter | 📋 | [adapter-servicenow.md](adapter-servicenow.md) |
 | 4D | Jira adapter | 📋 | [adapter-jira.md](adapter-jira.md) |
 | 4E | Splunk adapter | 📋 | [adapter-splunk.md](adapter-splunk.md) |
@@ -46,7 +46,7 @@ Each item links to a detailed spec in `docs/roadmap/`. Specs define scope, files
 | 4H | AWS Security Hub adapter | 📋 | [adapter-aws.md](adapter-aws.md) |
 | 4I | Azure Defender adapter | 📋 | [adapter-azure-defender.md](adapter-azure-defender.md) |
 | 4J | GCP Security Command Center adapter | 📋 | [adapter-gcp-scc.md](adapter-gcp-scc.md) |
-| 4K | SBOM ingestion (CycloneDX + SPDX) | 📋 | [adapter-sbom.md](adapter-sbom.md) |
+| 4K | SBOM ingestion (CycloneDX + SPDX) | ✅ | [adapter-sbom.md](adapter-sbom.md) |
 
 ## Phase 5 — Release Hardening
 
