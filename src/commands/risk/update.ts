@@ -23,6 +23,7 @@ export function registerRiskUpdate(riskCommand: Command): void {
     .option('--impact <n>', 'New impact (1-5)', parseInt)
     .option('--treatment <treatment>', 'Treatment strategy: mitigate, accept, transfer, avoid')
     .option('--treatment-plan <text>', 'Treatment plan description')
+    .option('--json', 'Output as JSON')
     .action(runRiskUpdate);
 }
 
@@ -34,6 +35,7 @@ interface RiskUpdateOptions {
   impact?: number;
   treatment?: string;
   treatmentPlan?: string;
+  json?: boolean;
 }
 
 function runRiskUpdate(riskRef: string, options: RiskUpdateOptions): void {
@@ -119,6 +121,11 @@ function runRiskUpdate(riskRef: string, options: RiskUpdateOptions): void {
   // Trigger propagation
   const updated = database.prepare('SELECT * FROM risks WHERE id = ?').get(existing.id);
   propagate(database, 'risk', existing.id, 'update', CLI_ACTOR, prev, updated);
+
+  if (options.json) {
+    console.log(JSON.stringify(updated, null, 2));
+    return;
+  }
 
   success(`Updated ${existing.risk_id}: "${options.title ?? existing.title}"`);
 }

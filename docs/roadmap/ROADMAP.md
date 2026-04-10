@@ -52,13 +52,13 @@ Each item links to a detailed spec in `docs/roadmap/`. Specs define scope, files
 
 | # | Feature | Status | Spec |
 |---|---------|--------|------|
-| 5A | README + quickstart + architecture diagram | 📋 | [docs-readme.md](docs-readme.md) |
-| 5B | CLI `--output json` on all commands | 📋 | [cli-json-output.md](cli-json-output.md) |
-| 5C | OpenAPI spec generation | 📋 | [openapi-spec.md](openapi-spec.md) |
-| 5D | GitHub Actions CI pipeline | 📋 | [ci-pipeline.md](ci-pipeline.md) |
-| 5E | Docker packaging | 📋 | [docker.md](docker.md) |
-| 5F | CONTRIBUTING.md + developer guide | 📋 | [contributing.md](contributing.md) |
-| 5G | Changelog + semantic versioning | 📋 | [versioning.md](versioning.md) |
+| 5A | README + quickstart + architecture diagram | ✅ | [docs-readme.md](docs-readme.md) |
+| 5B | CLI `--output json` on all commands | ✅ | [cli-json-output.md](cli-json-output.md) |
+| 5C | OpenAPI spec generation | ✅ | [openapi-spec.md](openapi-spec.md) |
+| 5D | GitHub Actions CI pipeline | ✅ | [ci-pipeline.md](ci-pipeline.md) |
+| 5E | Docker packaging | ✅ | [docker.md](docker.md) |
+| 5F | CONTRIBUTING.md + developer guide | ✅ | [contributing.md](contributing.md) |
+| 5G | Changelog + semantic versioning | ✅ | [versioning.md](versioning.md) |
 | 5H | Onboarding wizard (CLI + Web UI) | 📋 | [onboarding-wizard.md](onboarding-wizard.md) |
 
 ## Phase 6 — Proprietary Import

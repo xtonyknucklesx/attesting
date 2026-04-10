@@ -174,9 +174,27 @@ The Express API exposes endpoints for all modules:
 
 Crosswalk does **not** ship copyrighted framework content (e.g., SIG question text, ISO 27001 control text). The tool imports control text from your own licensed copies. Seed data contains only structural metadata (control IDs, risk domains, mapping references) without proprietary content.
 
+## Docker
+
+```bash
+docker compose up -d
+# Crosswalk available at http://localhost:3000
+```
+
+Data persists in a Docker volume (`crosswalk-data`).
+
 ## Project Status
 
-Active development. The compliance engine (catalogs, mappings, implementations, assessments, exports) is functional. The governance, risk, and threat intelligence modules are being integrated. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get involved.
+Active development. Core platform complete:
+
+- **Phase 1** ✅ CLI parity — 22+ commands across risk, intel, drift, connector groups
+- **Phase 2** ✅ Web UI — assets, intel, drift, connectors pages
+- **Phase 3** ✅ Test coverage — 288 tests across 44 files
+- **Phase 4** (partial) ✅ NVD adapter, SBOM ingestion (CycloneDX + SPDX)
+- **Phase 5** ✅ Docker, CI/CD, changelog, security policy
+- **Phase 6** ✅ Proprietary catalog import with file security scanning
+
+See [docs/roadmap/ROADMAP.md](docs/roadmap/ROADMAP.md) for the full roadmap.
 
 ## Contributing
 
