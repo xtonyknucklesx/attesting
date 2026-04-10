@@ -16,12 +16,14 @@ export function registerCatalogInspect(catalogCommand: Command): void {
     .description('Show controls in a catalog')
     .option('--limit <n>', 'Maximum number of controls to display', String(DEFAULT_LIMIT))
     .option('--search <text>', 'Full-text search within the catalog')
+    .option('--json', 'Output as JSON')
     .action(runCatalogInspect);
 }
 
 interface InspectOptions {
   limit: string;
   search?: string;
+  json?: boolean;
 }
 
 type ControlRow = Pick<Control, 'control_id' | 'title' | 'description'>;
@@ -75,6 +77,11 @@ function runCatalogInspect(shortName: string, options: InspectOptions): void {
          LIMIT ?`
       )
       .all(catalog.id, limit) as ControlRow[];
+  }
+
+  if (options.json) {
+    console.log(JSON.stringify(controls, null, 2));
+    return;
   }
 
   log(`\nCatalog: ${catalog.name}  (${catalog.total_controls} total controls)`);

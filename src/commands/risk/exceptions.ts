@@ -20,6 +20,7 @@ export function registerRiskExceptions(riskCommand: Command): void {
     .option('--approved-by <name>', 'Approver name')
     .option('--expiry-date <date>', 'Expiry date (YYYY-MM-DD)')
     .option('--control <control-id>', 'Specific control the exception applies to')
+    .option('--json', 'Output as JSON')
     .action(runRiskExceptions);
 }
 
@@ -31,6 +32,7 @@ interface RiskExceptionsOptions {
   approvedBy?: string;
   expiryDate?: string;
   control?: string;
+  json?: boolean;
 }
 
 function runRiskExceptions(riskRef: string | undefined, options: RiskExceptionsOptions): void {
@@ -50,6 +52,11 @@ function runRiskExceptions(riskRef: string | undefined, options: RiskExceptionsO
     database
       .prepare("UPDATE risk_exceptions SET status = 'expired' WHERE id = ?")
       .run(exc.id);
+
+    if (options.json) {
+      console.log(JSON.stringify({ id: exc.id, status: 'expired' }, null, 2));
+      return;
+    }
 
     success(`Exception ${exc.id} expired.`);
     return;
@@ -120,6 +127,12 @@ function runRiskExceptions(riskRef: string | undefined, options: RiskExceptionsO
         timestamp
       );
 
+    if (options.json) {
+      const created = database.prepare('SELECT * FROM risk_exceptions WHERE id = ?').get(id);
+      console.log(JSON.stringify(created, null, 2));
+      return;
+    }
+
     success(`Exception created for ${risk.risk_id} (ID: ${id})`);
     console.log(`  Approved by: ${options.approvedBy}  Expires: ${options.expiryDate}`);
     return;
@@ -145,6 +158,11 @@ function runRiskExceptions(riskRef: string | undefined, options: RiskExceptionsO
   sql += ' ORDER BY re.expiry_date ASC';
 
   const exceptions = database.prepare(sql).all(...params) as Array<RiskException & { risk_ref: string }>;
+
+  if (options.json) {
+    console.log(JSON.stringify(exceptions, null, 2));
+    return;
+  }
 
   if (exceptions.length === 0) {
     warn('No exceptions found.');

@@ -37,7 +37,7 @@ Each item links to a detailed spec in `docs/roadmap/`. Specs define scope, files
 | # | Feature | Status | Spec |
 |---|---------|--------|------|
 | 4A | CrowdStrike Falcon adapter | 📋 | [adapter-crowdstrike.md](adapter-crowdstrike.md) |
-| 4B | NIST NVD adapter | 📋 | [adapter-nvd.md](adapter-nvd.md) |
+| 4B | NIST NVD adapter | ✅ | [adapter-nvd.md](adapter-nvd.md) |
 | 4C | ServiceNow adapter | 📋 | [adapter-servicenow.md](adapter-servicenow.md) |
 | 4D | Jira adapter | 📋 | [adapter-jira.md](adapter-jira.md) |
 | 4E | Splunk adapter | 📋 | [adapter-splunk.md](adapter-splunk.md) |
@@ -46,20 +46,20 @@ Each item links to a detailed spec in `docs/roadmap/`. Specs define scope, files
 | 4H | AWS Security Hub adapter | 📋 | [adapter-aws.md](adapter-aws.md) |
 | 4I | Azure Defender adapter | 📋 | [adapter-azure-defender.md](adapter-azure-defender.md) |
 | 4J | GCP Security Command Center adapter | 📋 | [adapter-gcp-scc.md](adapter-gcp-scc.md) |
-| 4K | SBOM ingestion (CycloneDX + SPDX) | 📋 | [adapter-sbom.md](adapter-sbom.md) |
+| 4K | SBOM ingestion (CycloneDX + SPDX) | ✅ | [adapter-sbom.md](adapter-sbom.md) |
 
 ## Phase 5 — Release Hardening
 
 | # | Feature | Status | Spec |
 |---|---------|--------|------|
-| 5A | README + quickstart + architecture diagram | 📋 | [docs-readme.md](docs-readme.md) |
-| 5B | CLI `--output json` on all commands | 📋 | [cli-json-output.md](cli-json-output.md) |
-| 5C | OpenAPI spec generation | 📋 | [openapi-spec.md](openapi-spec.md) |
-| 5D | GitHub Actions CI pipeline | 📋 | [ci-pipeline.md](ci-pipeline.md) |
-| 5E | Docker packaging | 📋 | [docker.md](docker.md) |
-| 5F | CONTRIBUTING.md + developer guide | 📋 | [contributing.md](contributing.md) |
-| 5G | Changelog + semantic versioning | 📋 | [versioning.md](versioning.md) |
-| 5H | Onboarding wizard (CLI + Web UI) | 📋 | [onboarding-wizard.md](onboarding-wizard.md) |
+| 5A | README + quickstart + architecture diagram | ✅ | [docs-readme.md](docs-readme.md) |
+| 5B | CLI `--output json` on all commands | ✅ | [cli-json-output.md](cli-json-output.md) |
+| 5C | OpenAPI spec generation | ✅ | [openapi-spec.md](openapi-spec.md) |
+| 5D | GitHub Actions CI pipeline | ✅ | [ci-pipeline.md](ci-pipeline.md) |
+| 5E | Docker packaging | ✅ | [docker.md](docker.md) |
+| 5F | CONTRIBUTING.md + developer guide | ✅ | [contributing.md](contributing.md) |
+| 5G | Changelog + semantic versioning | ✅ | [versioning.md](versioning.md) |
+| 5H | Onboarding wizard (CLI + Web UI) | ✅ | [onboarding-wizard.md](onboarding-wizard.md) |
 
 ## Phase 6 — Proprietary Import
 

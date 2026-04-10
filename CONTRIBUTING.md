@@ -216,17 +216,13 @@ npm run test:watch
 
 Roughly in priority order:
 
-**Connector adapters** — CrowdStrike (asset inventory), ServiceNow ITSM (bidirectional ticketing), Splunk/Elastic (SIEM evidence), Okta/Entra ID (identity), cloud providers (AWS/Azure/GCP asset discovery), Qualys/Tenable (vulnerability scanning), CycloneDX/SPDX (SBOM ingestion).
-
-**Tests for new services** — The propagation engine, drift checks, manual intel service, and disposition workflow all need comprehensive test coverage.
-
-**React UI pages** — Asset inventory page, threat intelligence page, drift alerts dashboard with disposition interface, connector management page.
-
-**CLI commands for new modules** — `crosswalk risk`, `crosswalk intel`, `crosswalk drift`, `crosswalk connector` command groups.
+**Connector adapters** — CrowdStrike (asset inventory), ServiceNow ITSM (bidirectional ticketing), Splunk/Elastic (SIEM evidence), Okta/Entra ID (identity), cloud providers (AWS/Azure/GCP asset discovery). NVD, CISA KEV, and SBOM (CycloneDX/SPDX) are done.
 
 **Framework importers** — FedRAMP profile resolver (automatically resolve 800-53 baselines), additional OSCAL catalog sources.
 
-**Documentation** — API reference, architecture deep-dive, deployment guide, framework-specific walkthroughs.
+**Documentation** — API reference (OpenAPI spec), architecture deep-dive, deployment guide, framework-specific walkthroughs.
+
+**Onboarding wizard** — Guided first-run experience for CLI and Web UI. See `docs/roadmap/onboarding-wizard.md`.
 
 ## What Not to Submit
 

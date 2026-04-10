@@ -12,11 +12,13 @@ export function registerImplStatus(implCommand: Command): void {
     .command('status')
     .description('Show implementation coverage statistics per catalog')
     .option('--scope <name>', 'Scope name (omit for org-wide)')
+    .option('--json', 'Output as JSON')
     .action(runImplStatus);
 }
 
 interface ImplStatusOptions {
   scope?: string;
+  json?: boolean;
 }
 
 function runImplStatus(options: ImplStatusOptions): void {
@@ -47,6 +49,11 @@ function runImplStatus(options: ImplStatusOptions): void {
   }
 
   const results = calculateCoverage(org.id, scopeId, database);
+
+  if (options.json) {
+    console.log(JSON.stringify(results, null, 2));
+    return;
+  }
 
   if (results.length === 0) {
     warn('No catalogs with controls found.');
