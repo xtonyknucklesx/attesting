@@ -37,6 +37,7 @@ import { registerAssessmentCreate } from './commands/assessment/create.js';
 import { registerAssessmentEvaluate } from './commands/assessment/evaluate.js';
 import { registerAssessmentPoam } from './commands/assessment/poam.js';
 import { registerServe } from './commands/web/serve.js';
+import { registerSetup } from './commands/setup/wizard.js';
 import { registerRiskCommands } from './commands/risk/index.js';
 import { registerIntelCommands } from './commands/intel/index.js';
 import { registerDriftCommands } from './commands/drift/index.js';
@@ -154,5 +155,10 @@ registerConnectorCommands(program);
 // web serve command (top-level)
 // ---------------------------------------------------------------
 registerServe(program);
+
+// ---------------------------------------------------------------
+// setup wizard (top-level)
+// ---------------------------------------------------------------
+registerSetup(program);
 
 program.parse();

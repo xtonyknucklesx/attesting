@@ -59,7 +59,7 @@ Each item links to a detailed spec in `docs/roadmap/`. Specs define scope, files
 | 5E | Docker packaging | ✅ | [docker.md](docker.md) |
 | 5F | CONTRIBUTING.md + developer guide | ✅ | [contributing.md](contributing.md) |
 | 5G | Changelog + semantic versioning | ✅ | [versioning.md](versioning.md) |
-| 5H | Onboarding wizard (CLI + Web UI) | 📋 | [onboarding-wizard.md](onboarding-wizard.md) |
+| 5H | Onboarding wizard (CLI + Web UI) | ✅ | [onboarding-wizard.md](onboarding-wizard.md) |
 
 ## Phase 6 — Proprietary Import
 

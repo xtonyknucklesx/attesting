@@ -21,6 +21,7 @@ import { connectorRoutes } from './routes/connectors.js';
 import { ownerRoutes } from './routes/owners.js';
 import { auditRoutes } from './routes/audit.js';
 import { importRoutes } from './routes/import.js';
+import { onboardingRoutes } from './routes/onboarding.js';
 
 export interface ServerOptions {
   port: number;
@@ -73,6 +74,7 @@ export function createApp() {
   app.use('/api/owners', ownerRoutes());
   app.use('/api/audit', auditRoutes());
   app.use('/api/import', importRoutes());
+  app.use('/api/onboarding', onboardingRoutes());
 
   // OpenAPI spec
   app.get('/api/docs/openapi.yaml', (_req, res) => {
