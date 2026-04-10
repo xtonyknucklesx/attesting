@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3';
 import type { Connector } from '../../models/connector.js';
 import { BaseAdapter } from './base-adapter.js';
 import { CISAKEVAdapter } from './adapters/cisa-kev.js';
+import { NVDAdapter } from './adapters/nvd.js';
 
 type AdapterConstructor = new (
   db: Database.Database,
@@ -19,6 +20,7 @@ export class AdapterRegistry {
   constructor() {
     // Register built-in adapters
     this.register('CISAKEVAdapter', CISAKEVAdapter);
+    this.register('NVDAdapter', NVDAdapter);
     // Additional adapters registered here as they're built:
     // this.register('CrowdStrikeAdapter', CrowdStrikeAdapter);
     // this.register('ServiceNowITSMAdapter', ServiceNowITSMAdapter);

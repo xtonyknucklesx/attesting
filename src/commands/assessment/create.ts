@@ -27,6 +27,7 @@ export function registerAssessmentCreate(assessmentCommand: Command): void {
       'Assessment type: self, third-party, or audit',
       'self'
     )
+    .option('--json', 'Output as JSON')
     .action(runAssessmentCreate);
 }
 
@@ -35,6 +36,7 @@ interface AssessmentCreateOptions {
   catalog: string;
   scope?: string;
   type: string;
+  json?: boolean;
 }
 
 function runAssessmentCreate(options: AssessmentCreateOptions): void {
@@ -109,6 +111,12 @@ function runAssessmentCreate(options: AssessmentCreateOptions): void {
       timestamp,
       timestamp
     );
+
+  if (options.json) {
+    const created = database.prepare('SELECT * FROM assessments WHERE id = ?').get(id);
+    console.log(JSON.stringify(created, null, 2));
+    return;
+  }
 
   success(`Assessment created: "${options.name}" (ID: ${id})`);
   console.log(`  Catalog:  ${options.catalog}  (${totalControls} controls)`);

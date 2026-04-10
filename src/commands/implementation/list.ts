@@ -13,6 +13,7 @@ export function registerImplList(implCommand: Command): void {
     .option('--scope <name>', 'Filter by scope name')
     .option('--status <status>', 'Filter by implementation status')
     .option('--limit <n>', 'Maximum number of results', '50')
+    .option('--json', 'Output as JSON')
     .action(runImplList);
 }
 
@@ -21,6 +22,7 @@ interface ImplListOptions {
   scope?: string;
   status?: string;
   limit: string;
+  json?: boolean;
 }
 
 function runImplList(options: ImplListOptions): void {
@@ -70,6 +72,11 @@ function runImplList(options: ImplListOptions): void {
   }
 
   const rows = database.prepare(sql).all(...params, limit) as ImplRow[];
+
+  if (options.json) {
+    console.log(JSON.stringify(rows, null, 2));
+    return;
+  }
 
   if (rows.length === 0) {
     warn('No implementations found.');
