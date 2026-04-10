@@ -1,6 +1,6 @@
-![CI](https://github.com/xtonyknucklesx/crosswalk/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/xtonyknucklesx/attesting/actions/workflows/ci.yml/badge.svg)
 
-# Crosswalk
+# Attesting
 
 Open-source, OSCAL-native GRC platform. Map controls across frameworks, manage risk with live threat intelligence, and detect compliance drift — all from a single source of truth.
 
@@ -10,9 +10,9 @@ Compliance teams answer the same security questions across dozens of frameworks 
 
 The industry-standard tooling — SIG Manager in Excel, SOAs in spreadsheets, risk registers in SharePoint — makes this worse. There's no single source of truth, no cross-module propagation, and no way for a change in one area to automatically surface its impact everywhere else.
 
-## What Crosswalk Does
+## What Attesting Does
 
-Crosswalk treats governance, risk, and compliance as a connected graph, not three separate tabs.
+Attesting treats governance, risk, and compliance as a connected graph, not three separate tabs.
 
 **Compliance engine** — Import control catalogs from any framework. Map controls across frameworks so one implementation statement resolves everywhere. Export in any format: SIG questionnaires, OSCAL JSON, ISO SOAs, PDF reports, CSV.
 
@@ -53,31 +53,31 @@ External Intel ──→ Risk Module ──→ Governance
 ## Quick Start
 
 ```bash
-git clone https://github.com/xtonyknucklesx/crosswalk.git
-cd crosswalk
+git clone https://github.com/xtonyknucklesx/attesting.git
+cd attesting
 npm install
 npm run build
 
 # Initialize your organization
-crosswalk org init --name "My Company"
-crosswalk scope create --name "My Product" --type product
+attesting org init --name "My Company"
+attesting scope create --name "My Product" --type product
 
 # Import frameworks
-crosswalk catalog import --format oscal \
+attesting catalog import --format oscal \
   --file data/catalogs/nist-800-53-r5.json \
   --name "NIST 800-53" --short-name nist-800-53-r5
 
-crosswalk catalog import --format sig \
+attesting catalog import --format sig \
   --file path/to/SIG_Manager_2026.xlsm \
   --scope-level lite --name "SIG Lite 2026" --short-name sig-lite-2026
 
 # Import cross-framework mappings
-crosswalk mapping import --format csv \
+attesting mapping import --format csv \
   --file data/mappings/sig-to-nist800171.csv \
   --source-catalog sig-lite-2026 --target-catalog nist-800-171-r3
 
 # Add an implementation (resolves across all mapped frameworks)
-crosswalk impl add \
+attesting impl add \
   --control sig-lite-2026:A.1 \
   --scope "My Product" \
   --status implemented \
@@ -85,24 +85,24 @@ crosswalk impl add \
   --statement "We maintain a formalized risk governance policy approved by the board."
 
 # Check what that implementation covers
-crosswalk mapping resolve sig-lite-2026:A.1
+attesting mapping resolve sig-lite-2026:A.1
 
 # Check coverage across all frameworks
-crosswalk impl status --scope "My Product"
+attesting impl status --scope "My Product"
 
 # Export
-crosswalk export sig --catalog sig-lite-2026 --scope "My Product" \
+attesting export sig --catalog sig-lite-2026 --scope "My Product" \
   --format response-sig --output my-sig-response.xlsm
-crosswalk export oscal --type component-definition --scope "My Product" \
+attesting export oscal --type component-definition --scope "My Product" \
   --output my-component.json
 
 # Start the web UI
-crosswalk serve --port 3000
+attesting serve --port 3000
 ```
 
 ## Bundled Catalogs
 
-Crosswalk ships with 14 catalogs covering 3,206 controls:
+Attesting ships with 14 catalogs covering 3,206 controls:
 
 | Framework | Controls | Source Format |
 |-----------|----------|---------------|
@@ -172,11 +172,29 @@ The Express API exposes endpoints for all modules:
 
 ## Important: Copyrighted Content
 
-Crosswalk does **not** ship copyrighted framework content (e.g., SIG question text, ISO 27001 control text). The tool imports control text from your own licensed copies. Seed data contains only structural metadata (control IDs, risk domains, mapping references) without proprietary content.
+Attesting does **not** ship copyrighted framework content (e.g., SIG question text, ISO 27001 control text). The tool imports control text from your own licensed copies. Seed data contains only structural metadata (control IDs, risk domains, mapping references) without proprietary content.
+
+## Docker
+
+```bash
+docker compose up -d
+# Attesting available at http://localhost:3000
+```
+
+Data persists in a Docker volume (`attesting-data`).
 
 ## Project Status
 
-Active development. The compliance engine (catalogs, mappings, implementations, assessments, exports) is functional. The governance, risk, and threat intelligence modules are being integrated. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get involved.
+Active development. Core platform complete:
+
+- **Phase 1** ✅ CLI parity — 22+ commands across risk, intel, drift, connector groups
+- **Phase 2** ✅ Web UI — assets, intel, drift, connectors pages
+- **Phase 3** ✅ Test coverage — 288 tests across 44 files
+- **Phase 4** (partial) ✅ NVD adapter, SBOM ingestion (CycloneDX + SPDX)
+- **Phase 5** ✅ Docker, CI/CD, changelog, security policy
+- **Phase 6** ✅ Proprietary catalog import with file security scanning
+
+See [docs/roadmap/ROADMAP.md](docs/roadmap/ROADMAP.md) for the full roadmap.
 
 ## Contributing
 

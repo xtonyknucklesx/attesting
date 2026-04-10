@@ -35,6 +35,7 @@ export function registerAssessmentPoam(assessmentCommand: Command): void {
     .description('Generate POA&M items for unmet assessment results')
     .requiredOption('--assessment <name-or-id>', 'Assessment name or ID')
     .option('--output <file.xlsx>', 'Export POA&M workbook to this path')
+    .option('--json', 'Output as JSON')
     .action(runAssessmentPoam);
 }
 
@@ -77,6 +78,7 @@ interface PoamItemRow {
 async function runAssessmentPoam(options: {
   assessment: string;
   output?: string;
+  json?: boolean;
 }): Promise<void> {
   const database = db.getDb();
 
@@ -171,6 +173,22 @@ async function runAssessmentPoam(options: {
   });
 
   createPoamItems();
+
+  if (options.json) {
+    // Load all poam_items for this assessment
+    const poamItems = database
+      .prepare(
+        `SELECT p.*, c.control_id AS control_native_id
+         FROM poam_items p
+         JOIN assessment_results ar ON p.assessment_result_id = ar.id
+         JOIN controls c ON p.control_id = c.id
+         WHERE ar.assessment_id = ?
+         ORDER BY p.poam_id`
+      )
+      .all(assessment.id);
+    console.log(JSON.stringify(poamItems, null, 2));
+    return;
+  }
 
   success(
     `POA&M: ${created} new item(s) created for assessment "${assessment.name}".`

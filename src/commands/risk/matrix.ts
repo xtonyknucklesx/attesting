@@ -12,12 +12,14 @@ export function registerRiskMatrix(riskCommand: Command): void {
     .description('Display or configure the risk matrix')
     .option('--appetite <level>', 'Set risk appetite: low, moderate, high')
     .option('--threshold <n>', 'Set appetite threshold score', parseInt)
+    .option('--json', 'Output as JSON')
     .action(runRiskMatrix);
 }
 
 interface RiskMatrixOptions {
   appetite?: string;
   threshold?: number;
+  json?: boolean;
 }
 
 interface MatrixRow {
@@ -79,6 +81,11 @@ function runRiskMatrix(options: RiskMatrixOptions): void {
     // Reload
     matrix = database.prepare('SELECT * FROM risk_matrix WHERE id = ?').get(matrix.id) as MatrixRow;
     success('Risk matrix updated.');
+  }
+
+  if (options.json) {
+    console.log(JSON.stringify(matrix, null, 2));
+    return;
   }
 
   // Display the matrix

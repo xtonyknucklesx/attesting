@@ -1,4 +1,4 @@
-import React, { useState, Suspense, lazy, createContext, useContext } from 'react';
+import React, { useState, useEffect, Suspense, lazy, createContext, useContext } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import Sidebar from './components/layout/Sidebar';
 import Header from './components/layout/Header';
@@ -18,6 +18,7 @@ const AssetsPage = lazy(() => import('./components/assets/AssetsPage'));
 const IntelPage = lazy(() => import('./components/intel/IntelPage'));
 const DriftPage = lazy(() => import('./components/drift/DriftPage'));
 const ConnectorsPage = lazy(() => import('./components/connectors/ConnectorsPage'));
+const SetupWizard = lazy(() => import('./components/onboarding/SetupWizard'));
 
 interface ToastCtx { add: (msg: string, type?: 'success' | 'error') => void }
 const ToastContext = createContext<ToastCtx>({ add: () => {} });
@@ -35,6 +36,27 @@ export default function App() {
   const [scope, setScope] = useState('');
   const { toasts, add, dismiss } = useToast();
   const location = useLocation();
+  const [showWizard, setShowWizard] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    fetch('/api/onboarding/complete')
+      .then(r => r.json())
+      .then(d => setShowWizard(!d.complete))
+      .catch(() => setShowWizard(false));
+  }, []);
+
+  if (showWizard === null) return <PageLoader />;
+
+  if (showWizard) {
+    return (
+      <ToastContext.Provider value={{ add }}>
+        <Suspense fallback={<PageLoader />}>
+          <SetupWizard onComplete={() => setShowWizard(false)} />
+        </Suspense>
+        <Toasts toasts={toasts} onDismiss={dismiss} />
+      </ToastContext.Provider>
+    );
+  }
 
   return (
     <ToastContext.Provider value={{ add }}>

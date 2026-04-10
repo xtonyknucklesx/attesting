@@ -24,6 +24,7 @@ export function registerRiskCreate(riskCommand: Command): void {
     .option('--source <source>', 'Risk source')
     .option('--treatment <treatment>', 'Treatment strategy: mitigate, accept, transfer, avoid', 'mitigate')
     .option('--treatment-plan <text>', 'Treatment plan description')
+    .option('--json', 'Output as JSON')
     .action(runRiskCreate);
 }
 
@@ -37,6 +38,7 @@ interface RiskCreateOptions {
   source?: string;
   treatment: string;
   treatmentPlan?: string;
+  json?: boolean;
 }
 
 function runRiskCreate(options: RiskCreateOptions): void {
@@ -98,6 +100,12 @@ function runRiskCreate(options: RiskCreateOptions): void {
     impact: options.impact,
     status: 'open',
   });
+
+  if (options.json) {
+    const created = database.prepare('SELECT * FROM risks WHERE id = ?').get(id);
+    console.log(JSON.stringify(created, null, 2));
+    return;
+  }
 
   success(`Risk created: ${riskRef} — "${options.title}" (ID: ${id})`);
   console.log(`  Inherent score: ${inherentScore}  Treatment: ${options.treatment}  Owner: ${options.owner}`);

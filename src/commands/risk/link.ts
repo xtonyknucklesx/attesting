@@ -17,6 +17,7 @@ export function registerRiskLink(riskCommand: Command): void {
     .option('--effectiveness <level>', 'Control effectiveness: full, partial, minimal, unknown', 'partial')
     .option('--notes <text>', 'Notes on the link')
     .option('--list', 'List existing links for this risk')
+    .option('--json', 'Output as JSON (applies to --list mode)')
     .action(runRiskLink);
 }
 
@@ -26,6 +27,7 @@ interface RiskLinkOptions {
   effectiveness: string;
   notes?: string;
   list?: boolean;
+  json?: boolean;
 }
 
 function runRiskLink(riskRef: string, options: RiskLinkOptions): void {
@@ -60,6 +62,11 @@ function runRiskLink(riskRef: string, options: RiskLinkOptions): void {
          WHERE ral.risk_id = ?`
       )
       .all(risk.id) as Array<{ id: string; name: string; platform: string | null }>;
+
+    if (options.json) {
+      console.log(JSON.stringify({ controlLinks, assetLinks }, null, 2));
+      return;
+    }
 
     info(`Links for ${risk.risk_id} — "${risk.title}":\n`);
 
